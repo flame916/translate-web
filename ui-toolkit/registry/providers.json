@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "providers": [
+    {
+      "id": "uiverse",
+      "name": "Uiverse",
+      "homepage": "https://uiverse.io",
+      "allowedHosts": [
+        "uiverse.io"
+      ],
+      "categories": [
+        "button",
+        "input",
+        "loader",
+        "switch",
+        "card",
+        "other"
+      ],
+      "formats": [
+        "html-css"
+      ],
+      "acquisition": "manual",
+      "adapterId": "manual-v1",
+      "status": "active",
+      "licensePolicy": "逐条保存来源与许可；官方 Galaxy 快照按 MIT 许可保留",
+      "createdAt": "2026-10-08T13:04:32+00:00",
+      "updatedAt": "2026-10-08T13:35:44.209960+00:00"
+    }
+  ]
+}

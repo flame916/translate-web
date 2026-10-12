@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "resources": [
+    {
+      "name": "@radix-ui/colors",
+      "version": "3.0.0",
+      "url": "https://registry.npmjs.org/@radix-ui/colors/-/colors-3.0.0.tgz",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "files": [
+        {
+          "path": "ui-toolkit/vendor/radix/gray.css",
+          "sha256": "254092c943058abe44b2405b97385737d8577b52195569e35830b8830bf288bb",
+          "bytes": 1043
+        },
+        {
+          "path": "ui-toolkit/vendor/radix/bronze.css",
+          "sha256": "9877d4800ffeee51ffa1577d5c323295592160d4427c357cedfe9dec64447e9f",
+          "bytes": 1093
+        },
+        {
+          "path": "ui-toolkit/vendor/radix/green.css",
+          "sha256": "65e22a890eeacb3ac9853430fdd0233f0b86bcaa74a786763fb3069d283d95aa",
+          "bytes": 1063
+        },
+        {
+          "path": "ui-toolkit/vendor/radix/red.css",
+          "sha256": "b6ff5723edb3161efb8e0217ee373d0d4f844f63f921f0fd88fe970754a9b7a2",
+          "bytes": 1020
+        },
+        {
+          "path": "ui-toolkit/licenses/radix-colors.txt",
+          "sha256": "9c400881b9139571aa7acc3bd6e422a4f05223b4519169fb661298fb44bf228e",
+          "bytes": 1062
+        }
+      ]
+    },
+    {
+      "name": "@fontsource/inter",
+      "version": "5.3.0",
+      "url": "https://registry.npmjs.org/@fontsource/inter/-/inter-5.3.0.tgz",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "files": [
+        {
+          "path": "ui-toolkit/assets/fonts/inter-latin-400-normal.woff2",
+          "sha256": "8909904ab6c872eb994093482a88a28eca2cd95912d7b6fecd72103b0dc07edc",
+          "bytes": 23664
+        },
+        {
+          "path": "ui-toolkit/assets/fonts/inter-latin-600-normal.woff2",
+          "sha256": "f9a06e79cd3a2a20951c0f0e28f66dd0e6d3fda73911d640a2125c8fcb78f21a",
+          "bytes": 24452
+        },
+        {
+          "path": "ui-toolkit/licenses/inter.txt",
+          "sha256": "3b0a5fca3d17942cde889069889dedbbbd075e9b599968c82a95f4d944e9b345",
+          "bytes": 4477
+        }
+      ]
+    },
+    {
+      "name": "uiverse-galaxy",
+      "version": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "url": "https://github.com/uiverse-io/galaxy",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "files": [
+        {
+          "path": "ui-toolkit/licenses/uiverse-galaxy.txt",
+          "sha256": "7feadcd7a611d37a4546c99f63a162bdf65656137828ebcba92e57dccfa368a4",
+          "bytes": 1067
+        }
+      ]
+    },
+    {
+      "name": "shadcn-official-skill",
+      "version": "0132174664c07d41262fb51012d0cc782e458e6c",
+      "url": "https://github.com/shadcn-ui/ui/tree/0132174664c07d41262fb51012d0cc782e458e6c/skills/shadcn",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "files": [
+        {
+          "path": ".agents/skills/shadcn/cli.md",
+          "sha256": "a381e35bf36fe7bb851952c13707e01e82434fd7a4a4e53f6df26c6370838904",
+          "bytes": 17304
+        },
+        {
+          "path": ".agents/skills/shadcn/customization.md",
+          "sha256": "84c1d47168c4b8adb5840e4af30a4e373ae3377c1110478c8974f398dd63f5ba",
+          "bytes": 6074
+        },
+        {
+          "path": ".agents/skills/shadcn/mcp.md",
+          "sha256": "8d696b4e45b7d0e337367248513bd9acebe8f3bcfd7b748c775e5a337c8f38c8",
+          "bytes": 3510
+        },
+        {
+          "path": ".agents/skills/shadcn/registry.md",
+          "sha256": "4f239be36bd2b58e17047db1ca80ab7da00e15a8b73242e5e4d50d113c4caa05",
+          "bytes": 8817
+        },
+        {
+          "path": ".agents/skills/shadcn/SKILL.md",
+          "sha256": "deba6c5152d9835892fa7dffeb1fedbb689ddac7e59e14e57ec5eaf9463309e4",
+          "bytes": 19527
+        },
+        {
+          "path": ".agents/skills/shadcn/agents/openai.yml",
+          "sha256": "35db91b1eef58b2abe01da9b88577de5a44e233b740cd93d692ddeeadd2afe4d",
+          "bytes": 238
+        },
+        {
+          "path": ".agents/skills/shadcn/assets/shadcn-small.png",
+          "sha256": "0ecc62d682727f68fc4937eed19960c706714fa084d44f63028d611ae02bf3d7",
+          "bytes": 1049
+        },
+        {
+          "path": ".agents/skills/shadcn/assets/shadcn.png",
+          "sha256": "7d60ad6fec4d89a0d44ba5a3c9283d2fea0047af5467f9227040e20d927d39b7",
+          "bytes": 3852
+        },
+        {
+          "path": ".agents/skills/shadcn/evals/evals.json",
+          "sha256": "58aca2760b0cc5265bb575f76cd8eed344b88544314b8cb2cd53e0b8007dc936",
+          "bytes": 6330
+        },
+        {
+          "path": ".agents/skills/shadcn/rules/base-vs-radix.md",
+          "sha256": "2b2deb47d004285220c1fc6b38bb2edc2d0ccbcdafd031b0b189d5d8ed0d1ba8",
+          "bytes": 6954
+        },
+        {
+          "path": ".agents/skills/shadcn/rules/chat.md",
+          "sha256": "de29c12524a27578a59ecf8c95ea939278c1a3572a3706bfc99f6f92cb770b7b",
+          "bytes": 8018
+        },
+        {
+          "path": ".agents/skills/shadcn/rules/composition.md",
+          "sha256": "f282df828d83a91132a846ddb62eea149a7c7c94822e9ca88cfddf85af01aa41",
+          "bytes": 4892
+        },
+        {
+          "path": ".agents/skills/shadcn/rules/forms.md",
+          "sha256": "29593e14381e34626f8e0e9c15c59f3394b92a0623af6a6ec94585400123853c",
+          "bytes": 4857
+        },
+        {
+          "path": ".agents/skills/shadcn/rules/icons.md",
+          "sha256": "d4a58266648872d9ee07d0c2368843a1cb88b8253b7f528dd7bda9d68b6c2535",
+          "bytes": 1958
+        },
+        {
+          "path": ".agents/skills/shadcn/rules/styling.md",
+          "sha256": "f88fbd72dff862805b786dc7d7e4c74c83030fc278c5b97c993e4e665001798c",
+          "bytes": 4675
+        }
+      ]
+    }
+  ]
+}

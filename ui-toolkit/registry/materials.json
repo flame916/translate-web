@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "materials": [
+    {
+      "id": "uiverse-loader-old-mole-38",
+      "providerId": "uiverse",
+      "name": "Uiverse loader · Saiyed-Tanvir",
+      "sourceUrl": "https://uiverse.io/Saiyed-Tanvir/old-mole-38",
+      "author": "Saiyed-Tanvir",
+      "category": "loader",
+      "format": "html-css",
+      "status": "candidate",
+      "license": "MIT",
+      "licenseStatus": "confirmed",
+      "licenseEvidence": "https://github.com/uiverse-io/galaxy/blob/adbd2adde0a299a3956ea288fb444ec01891ca41/LICENSE",
+      "licenseFile": "ui-toolkit/licenses/uiverse-galaxy.txt",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "version": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "contentHash": "cc28e30a157e375e423ac45c64fd115521b316d4b02d769956389bede7299d2d",
+      "sourceFiles": [
+        "ui-toolkit/materials/uiverse-loader-old-mole-38/original.html"
+      ],
+      "adaptedFiles": [],
+      "usedIn": [],
+      "verification": [],
+      "originalCredit": "Kemboi-Dun"
+    },
+    {
+      "id": "uiverse-button-great-seahorse-44",
+      "providerId": "uiverse",
+      "name": "Uiverse button · satyamchaudharydev",
+      "sourceUrl": "https://uiverse.io/satyamchaudharydev/great-seahorse-44",
+      "author": "satyamchaudharydev",
+      "category": "button",
+      "format": "html-css",
+      "status": "candidate",
+      "license": "MIT",
+      "licenseStatus": "confirmed",
+      "licenseEvidence": "https://github.com/uiverse-io/galaxy/blob/adbd2adde0a299a3956ea288fb444ec01891ca41/LICENSE",
+      "licenseFile": "ui-toolkit/licenses/uiverse-galaxy.txt",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "version": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "contentHash": "1fcdb6890c19413f6bd001f1a42e605cbe2af0955400e8288e7ad8aebc4db2f0",
+      "sourceFiles": [
+        "ui-toolkit/materials/uiverse-button-great-seahorse-44/original.html"
+      ],
+      "adaptedFiles": [],
+      "usedIn": [],
+      "verification": [],
+      "originalCredit": "Yaya12085"
+    },
+    {
+      "id": "uiverse-input-proud-husky-84",
+      "providerId": "uiverse",
+      "name": "Uiverse input · cohencoo",
+      "sourceUrl": "https://uiverse.io/cohencoo/proud-husky-84",
+      "author": "cohencoo",
+      "category": "input",
+      "format": "html-css",
+      "status": "verified",
+      "license": "MIT",
+      "licenseStatus": "confirmed",
+      "licenseEvidence": "https://github.com/uiverse-io/galaxy/blob/adbd2adde0a299a3956ea288fb444ec01891ca41/LICENSE",
+      "licenseFile": "ui-toolkit/licenses/uiverse-galaxy.txt",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "version": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "contentHash": "3c61c1c0a39f9aaa445ba943b83b6433d692a1c4c5d04556e917c270aa3b58c0",
+      "sourceFiles": [
+        "ui-toolkit/materials/uiverse-input-proud-husky-84/original.html"
+      ],
+      "adaptedFiles": [
+        "ui-toolkit/components.css",
+        "ui-toolkit/components.js"
+      ],
+      "usedIn": [
+        "stage0-prototype/index.html",
+        "ui-toolkit/preview/index.html"
+      ],
+      "verification": [
+        "2026-10-08 浏览器：默认、加载、禁用、错误、成功和空白组件状态通过",
+        "2026-10-08 阅读台与预览：1440/1024/768/390px，无横向溢出",
+        "2026-10-08 键盘：浮窗焦点循环/恢复、开关空格操作；减少动效预览关闭动画",
+        "2026-10-08 本机服务与素材库 14 项测试通过；详情 docs/ui/UI工具实施与验收记录.md"
+      ],
+      "originalCredit": "LightAndy1",
+      "adaptationNote": "保留圆角和偏移焦点环，替换为语义配色、弹性宽度和键盘可见焦点。",
+      "verifiedAt": "2026-10-08T13:41:04.311406+00:00"
+    },
+    {
+      "id": "uiverse-switch-cuddly-sheep-92",
+      "providerId": "uiverse",
+      "name": "Uiverse switch · Pradeepsaranbishnoi",
+      "sourceUrl": "https://uiverse.io/Pradeepsaranbishnoi/cuddly-sheep-92",
+      "author": "Pradeepsaranbishnoi",
+      "category": "switch",
+      "format": "html-css",
+      "status": "candidate",
+      "license": "MIT",
+      "licenseStatus": "confirmed",
+      "licenseEvidence": "https://github.com/uiverse-io/galaxy/blob/adbd2adde0a299a3956ea288fb444ec01891ca41/LICENSE",
+      "licenseFile": "ui-toolkit/licenses/uiverse-galaxy.txt",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "version": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "contentHash": "eea3f1d40800462cd803fe97b497345310bb50b8261e39b219bd75b739c4287e",
+      "sourceFiles": [
+        "ui-toolkit/materials/uiverse-switch-cuddly-sheep-92/original.html"
+      ],
+      "adaptedFiles": [],
+      "usedIn": [],
+      "verification": [],
+      "originalCredit": "Yaya12085"
+    },
+    {
+      "id": "uiverse-loader-ugly-skunk-66",
+      "providerId": "uiverse",
+      "name": "Uiverse loader · Nawsome",
+      "sourceUrl": "https://uiverse.io/Nawsome/ugly-skunk-66",
+      "author": "Nawsome",
+      "category": "loader",
+      "format": "html-css",
+      "status": "verified",
+      "license": "MIT",
+      "licenseStatus": "confirmed",
+      "licenseEvidence": "https://github.com/uiverse-io/galaxy/blob/adbd2adde0a299a3956ea288fb444ec01891ca41/LICENSE",
+      "licenseFile": "ui-toolkit/licenses/uiverse-galaxy.txt",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "version": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "contentHash": "9c9dcc6c8c030a96d8b4b138762617fe379d10ec2b7f4926538b5d88dde36769",
+      "sourceFiles": [
+        "ui-toolkit/materials/uiverse-loader-ugly-skunk-66/original.html"
+      ],
+      "adaptedFiles": [
+        "ui-toolkit/components.css",
+        "ui-toolkit/components.js"
+      ],
+      "usedIn": [
+        "stage0-prototype/index.html",
+        "ui-toolkit/preview/index.html"
+      ],
+      "verification": [
+        "2026-10-08 浏览器：默认、加载、禁用、错误、成功和空白组件状态通过",
+        "2026-10-08 阅读台与预览：1440/1024/768/390px，无横向溢出",
+        "2026-10-08 键盘：浮窗焦点循环/恢复、开关空格操作；减少动效预览关闭动画",
+        "2026-10-08 本机服务与素材库 14 项测试通过；详情 docs/ui/UI工具实施与验收记录.md"
+      ],
+      "originalCredit": "bociKond",
+      "adaptationNote": "保留虚线圆环旋转，移除手机外框和摇晃，使用相对尺寸并支持减少动效。",
+      "verifiedAt": "2026-10-08T13:41:04.311406+00:00"
+    },
+    {
+      "id": "uiverse-button-popular-ladybug-27",
+      "providerId": "uiverse",
+      "name": "Uiverse button · WhiteNervosa",
+      "sourceUrl": "https://uiverse.io/WhiteNervosa/popular-ladybug-27",
+      "author": "WhiteNervosa",
+      "category": "button",
+      "format": "html-css",
+      "status": "verified",
+      "license": "MIT",
+      "licenseStatus": "confirmed",
+      "licenseEvidence": "https://github.com/uiverse-io/galaxy/blob/adbd2adde0a299a3956ea288fb444ec01891ca41/LICENSE",
+      "licenseFile": "ui-toolkit/licenses/uiverse-galaxy.txt",
+      "retrievedAt": "2026-10-08T13:04:32.572539+00:00",
+      "version": "adbd2adde0a299a3956ea288fb444ec01891ca41",
+      "contentHash": "bca0b4f265d4681ab6bb5289c83ee3979b76e37c38804311e1f1dab2666b72ab",
+      "sourceFiles": [
+        "ui-toolkit/materials/uiverse-button-popular-ladybug-27/original.html"
+      ],
+      "adaptedFiles": [
+        "ui-toolkit/components.css",
+        "ui-toolkit/components.js"
+      ],
+      "usedIn": [
+        "stage0-prototype/index.html",
+        "ui-toolkit/preview/index.html"
+      ],
+      "verification": [
+        "2026-10-08 浏览器：默认、加载、禁用、错误、成功和空白组件状态通过",
+        "2026-10-08 阅读台与预览：1440/1024/768/390px，无横向溢出",
+        "2026-10-08 键盘：浮窗焦点循环/恢复、开关空格操作；减少动效预览关闭动画",
+        "2026-10-08 本机服务与素材库 14 项测试通过；详情 docs/ui/UI工具实施与验收记录.md"
+      ],
+      "originalCredit": "simontheonlyone",
+      "adaptationNote": "保留背景和文字过渡，移除发光、字距和装饰边线，补充禁用和加载状态。",
+      "verifiedAt": "2026-10-08T13:41:04.311406+00:00"
+    }
+  ]
+}

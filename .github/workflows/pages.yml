@@ -1,0 +1,45 @@
+name: Deploy dictionary MVP to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Assemble website
+        run: |
+          mkdir -p _site/stage0-prototype _site/ui-toolkit
+          cp -R stage0-prototype/assets stage0-prototype/src _site/stage0-prototype/
+          cp stage0-prototype/index.html stage0-prototype/styles.css stage0-prototype/package.json stage0-prototype/README.md _site/stage0-prototype/
+          cp -R ui-toolkit/. _site/ui-toolkit/
+          cp index.html .nojekyll _site/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

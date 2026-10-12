@@ -1,0 +1,32 @@
+/* Adaptations of Uiverse candidates; source files, authors and MIT license are in registry/materials.json. */
+/* Button: WhiteNervosa/popular-ladybug-27 (raw credit: simontheonlyone).
+   Retains the color/background transitions; removes uppercase, glow and expanding borders. */
+.lx-button,.primary-button,.secondary-button,.quiet-button {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font-size:14px;font-weight:600;transition:color .2s linear,background-color .2s linear;white-space:nowrap;text-decoration:none}
+.lx-button:hover,.secondary-button:hover {background:var(--soft)}
+.lx-button.primary,.primary-button {background:var(--accent);border-color:var(--accent);color:#fff}
+.lx-button.primary:hover,.primary-button:hover {background:var(--accent-hover)}
+.quiet-button {background:transparent;border-color:transparent;color:var(--muted)} .quiet-button:hover {background:var(--soft)}
+/* Loader: Nawsome/ugly-skunk-66 (raw credit: bociKond).
+   Retains the dashed circular rotation; removes phone and shaking, uses em sizing. */
+.lx-loader {display:inline-block;width:1.1em;height:1.1em;border:2px dashed currentColor;border-radius:50%;animation:lx-spin 1.4s linear infinite;flex-shrink:0}
+@keyframes lx-spin {to {transform:rotate(360deg)}}
+/* Input: cohencoo/proud-husky-84 (raw credit: LightAndy1).
+   Retains rounded field and offset focus ring; replaces blue/dark colors with semantic tokens. */
+.lx-field,input:not([type=checkbox]),textarea,select {border:1px solid var(--gray-7);border-radius:9px;background:var(--paper);color:var(--ink);padding:10px 12px;min-width:0;transition:background-color .2s ease;max-width:100%}
+.lx-field:hover,input:hover,textarea:hover {background:#fffdfa}
+.lx-field:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible {outline:2px solid var(--focus);outline-offset:3px}
+::placeholder {color:var(--gray-11);opacity:1}
+.lx-badge {display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:12px;line-height:1.6;color:var(--muted);background:var(--paper)}
+.lx-badge.success {background:var(--green-3);color:var(--green-11);border-color:var(--green-6)}
+.lx-badge.error {background:var(--red-3);color:var(--red-11);border-color:var(--red-6)}
+.lx-card {background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.lx-empty {padding:36px 24px;border:1px dashed var(--gray-8);border-radius:var(--radius);color:var(--muted);text-align:center}
+/* Project-authored switch: keeps the real checkbox focusable and labelled. */
+.lx-switch {display:inline-flex;align-items:center;gap:12px;cursor:pointer;position:relative}
+.lx-switch input {position:absolute;width:44px;height:26px;opacity:0;margin:0;z-index:1;cursor:pointer}
+.lx-switch-track {width:44px;height:26px;border-radius:99px;background:var(--gray-8);padding:3px;display:inline-block;flex-shrink:0}
+.lx-switch-track::after {content:'';display:block;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s}
+.lx-switch input:checked + .lx-switch-track {background:var(--accent)}
+.lx-switch input:checked + .lx-switch-track::after {transform:translateX(18px)}
+.lx-switch input:focus-visible + .lx-switch-track {outline:3px solid var(--focus);outline-offset:3px}
+.lx-toast {position:fixed;z-index:50;right:24px;bottom:24px;max-width:calc(100vw - 48px);padding:12px 18px;border-radius:10px;background:var(--gray-12);color:#fff;font-size:14px;box-shadow:var(--shadow)}

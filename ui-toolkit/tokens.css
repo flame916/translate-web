@@ -1,0 +1,22 @@
+@import url('./vendor/radix/gray.css');
+@import url('./vendor/radix/bronze.css');
+@import url('./vendor/radix/green.css');
+@import url('./vendor/radix/red.css');
+@font-face {font-family:Inter;src:url('./assets/fonts/inter-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face {font-family:Inter;src:url('./assets/fonts/inter-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+:root {
+  color-scheme:light; --ink:var(--gray-12); --muted:var(--gray-11); --canvas:#f7f6f2;
+  --paper:#fff; --soft:var(--gray-3); --line:var(--gray-6); --accent:#9b452d;
+  --accent-hover:#7d3521; --accent-soft:var(--bronze-3); --green:var(--green-11);
+  --danger:var(--red-11); --focus:#8b442f; --radius:12px; --shadow:0 12px 35px #2222190a;
+  font-family:Inter,'Segoe UI','Microsoft YaHei',system-ui,sans-serif; font-size:16px; line-height:1.6;
+}
+* {box-sizing:border-box} body {margin:0;color:var(--ink);background:var(--canvas)}
+button,input,textarea,select {font:inherit} button {cursor:pointer} button:disabled {cursor:not-allowed;opacity:.6}
+button,a,input,textarea,select,summary {scroll-margin:24px}
+:focus-visible {outline:3px solid var(--focus);outline-offset:3px}
+a {color:var(--accent);text-underline-offset:4px} img,svg {max-width:100%}
+.hidden,[hidden] {display:none!important} .sr-only {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.lx-icon {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle}
+@media(prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+:root[data-reduce-motion='true'] *, :root[data-reduce-motion='true'] *::before, :root[data-reduce-motion='true'] *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}

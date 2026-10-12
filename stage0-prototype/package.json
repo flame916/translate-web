@@ -1,0 +1,11 @@
+{
+  "name": "etymology-translation-stage0",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "英语词源增强多领域翻译应用的阶段零前端原型",
+  "scripts": {
+    "start": "powershell -NoProfile -ExecutionPolicy Bypass -File ../ui-toolkit/start.ps1",
+    "start:python": "python ../ui-toolkit/scripts/serve.py"
+  }
+}

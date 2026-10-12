@@ -1,0 +1,31 @@
+[
+  {
+    "id": "aladdins-cave",
+    "word": "Aladdin's cave",
+    "phonetic": "/əˈlædɪnz ˈkeɪv/",
+    "partOfSpeech": "n.",
+    "meaning": "藏有巨大财富的地方；宝藏。",
+    "root": "《一千零一夜》",
+    "rootMeaning": "源出阿拉丁与神灯的故事",
+    "note": "词典将 Aladdin's cave 解释为“藏有巨大财富的地方”或“宝藏”，典故源于《一千零一夜》中的阿拉丁故事。",
+    "source": "英语词源典故词典",
+    "author": "庄和诚、庄艳 编",
+    "page": "9",
+    "scanImage": "./assets/dictionary-scans/page-009.jpeg",
+    "reviewed": true
+  },
+  {
+    "id": "euthanasia",
+    "word": "euthanasia",
+    "partOfSpeech": "n.",
+    "meaning": "安乐死；无痛苦致死术。",
+    "root": "希腊语 euthanasía",
+    "rootMeaning": "good death · easy death · happy death",
+    "note": "词典说明 euthanasia 源自希腊语 euthanasía，字面义为 good death、easy death 或 happy death，并介绍其历史用法。",
+    "source": "英语词源典故词典",
+    "author": "庄和诚、庄艳 编",
+    "page": "105",
+    "scanImage": "./assets/dictionary-scans/page-105.jpeg",
+    "reviewed": true
+  }
+]

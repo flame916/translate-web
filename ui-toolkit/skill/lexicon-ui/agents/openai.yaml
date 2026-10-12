@@ -1,0 +1,6 @@
+interface:
+  display_name: "Lexicon UI 工具"
+  short_description: "维护词源翻译项目的阅读界面、统一组件与可持续补充的素材网站"
+  default_prompt: "使用 $lexicon-ui 调整翻译阅读界面，并复用已验证的本地组件与素材。"
+policy:
+  allow_implicit_invocation: true

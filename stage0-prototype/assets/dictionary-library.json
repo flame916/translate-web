@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "dictionaries": [
+    {
+      "id": "english-etymology",
+      "title": "英语词源典故词典",
+      "authors": "庄和诚、庄艳 编",
+      "language": "en-zh",
+      "enabled": true,
+      "priority": 100,
+      "entriesPath": "./assets/dictionaries/english-etymology/entries.json",
+      "indexPath": "./assets/dictionary-index.json",
+      "imageBase": "./assets/dictionary-pages/"
+    },
+    {
+      "id": "english-chinese-dictionary-2005",
+      "title": "英汉词典（缩印本）",
+      "authors": "非常英语词典编写组",
+      "language": "en-zh",
+      "enabled": true,
+      "priority": 0,
+      "entriesPath": "./assets/dictionaries/english-chinese-dictionary-2005/entries.json",
+      "indexPath": "./assets/dictionaries/english-chinese-dictionary-2005/index.json",
+      "imageBase": "./assets/dictionaries/english-chinese-dictionary-2005/images/",
+      "publisher": "外文出版社",
+      "publicationYear": "2005",
+      "edition": "2006年第1版第1次印刷",
+      "isbn": "7-119-04088-X",
+      "rightsNote": "用户于2026-10-11确认全部内容可授权用于本网站导入。",
+      "textOrigin": "PDF文字层提取；正文按左右栏顺序整理。",
+      "sourceFileName": "英汉词典 (An English-Chinese Dictionary) ( etc.) (z-library.sk, 1lib.sk, z-lib.sk).pdf"
+    }
+  ]
+}
