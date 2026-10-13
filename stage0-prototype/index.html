@@ -40,7 +40,7 @@
             <div>
               <span class="lx-badge" id="dictionary-source-label">词典库载入中…</span>
               <h2 id="lookup-heading">先看译义，再核对词典依据。</h2>
-              <p>输入词语或短语，可检索已导入词典词头与原书页面；自动整理的释义会标明待核对。</p>
+              <p>先显示词典译义；自动整理的内容会标明待核对，原书出处可稍后展开查看。</p>
             </div>
             <span class="privacy-badge"><span class="status-dot"></span>本地查询</span>
           </div>
@@ -64,7 +64,7 @@
               </div>
             </div>
           </div>
-          <p class="lookup-note" id="lookup-note">已核对词条可直接参考；新导入词典的自动整理内容仍需对照原书页核实。尚未接入整句翻译引擎。</p>
+          <p class="lookup-note" id="lookup-note">优先显示查到的词典释义；自动整理内容会标明待核对，原书页面作为后续参考。尚未接入整句翻译引擎。</p>
           <div class="insight-strip hidden" id="main-insight">
             <div><span class="eyebrow">词典匹配</span><strong id="match-count">等待查询</strong></div>
             <div class="matched-terms" id="matched-terms"></div>
@@ -104,7 +104,7 @@
         <div class="quick-input-wrap"><label for="quick-input" class="sr-only">输入要翻译的英文</label><textarea id="quick-input" rows="3" placeholder="输入词语、短语或句子"></textarea><button class="clipboard-button" id="clipboard-read">读取剪贴板</button></div>
         <div class="quick-controls"><span class="source-caption" id="quick-source-caption">来源：当前选择的词典</span><button class="primary-button" id="translate-button">翻译</button></div>
         <div class="translation-result" id="translation-result" role="status" aria-live="polite"><span class="result-placeholder">词典释义与出处会显示在这里</span></div>
-        <div class="adapter-hint"><span class="status-dot"></span>词典原书词条已导入；未校对内容需对照原页确认</div>
+          <div class="adapter-hint"><span class="status-dot"></span>先显示可用词典释义；原书核对可稍后进行</div>
       </div>
     </div>
 
@@ -118,6 +118,7 @@
     </div>
 
     <div class="lx-toast" id="toast" role="status" hidden></div>
-    <script type="module" src="./src/app.js?v=dictionary-mvp-2"></script>
+    <script type="module" src="./src/app.js?v=dictionary-mvp-3"></script>
   </body>
 </html>
+

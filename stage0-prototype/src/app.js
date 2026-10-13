@@ -106,26 +106,25 @@ function resultFor(text, record = true, updateMain = true) {
   state.lastText = text;
   state.currentMatches = matches;
   state.pageHits = pageHits;
-  state.currentTranslation = matches.map(term => matches.length > 1 ? `${term.word}：${term.meaning}（${term.source}，页码 ${term.page || '待核对'}）` : term.meaning).join('\n');
+  const copyableTerms = [...matches, ...candidates];
+  state.currentTranslation = copyableTerms.map(term => copyableTerms.length > 1 ? `${term.word}：${term.meaning}` : term.meaning).join('\n');
   state.showMatches = true;
   $('#main-insight').classList.remove('hidden');
   $('#match-count').textContent = `已核对释义 ${matches.length} 条 · 原书词条候选 ${candidates.length} 条 · ${pageHitsLabel(pageHits)} ${pageHits.length} 页`;
   $('#matched-terms').innerHTML = matches.map(term => `<button class="match-chip" type="button" data-select-term="${escapeHtml(term.id)}">${escapeHtml(term.word)}<small>${escapeHtml(term.source)} · 页码 ${escapeHtml(term.page || "待核对")}</small></button>`).join('');
-  const translationHtml = matches.length
-    ? `<section class="translation-output"><span class="translation-mode">模拟译文 · 来自已核对词典词条</span>${matches.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">${escapeHtml(term.source)} · 页码 ${escapeHtml(term.page || "待核对")}</small></p>`).join('')}</section>`
-    : candidates.length
-      ? `<section class="translation-output tentative"><span class="translation-mode">已命中原书词头 · 自动整理内容待逐条校对</span><p>下方展示 PDF 文字层中的原书摘录和扫描页。核对原页后再采用释义；目前不会把它当作已确认译义。</p></section>`
+  const translationHtml = matches.length || candidates.length
+    ? `<section class="translation-output ${candidates.length ? 'tentative' : ''}"><span class="translation-mode">${matches.length && candidates.length ? '词典译义 · 含待核对摘录' : candidates.length ? '词典译义 · 自动整理，待核对' : '模拟译义 · 来自已核对词典词条'}</span>${matches.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">已核对 · ${escapeHtml(term.source)}</small></p>`).join('')}${candidates.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">自动整理摘录 · 尚未逐条核对 · ${escapeHtml(term.source)}</small></p>`).join('')}</section>`
       : pageHits.length
-        ? `<section class="translation-output tentative"><span class="translation-mode">${pageHitsLabel(pageHits)} · 词条释义待核对</span><p>已找到可能相关的词典页面；请先核对下方页面内容，再采用其中译义。</p></section>`
-      : `<section class="translation-output empty-translation"><span class="translation-mode">尚无可用译义</span><p>当前词典索引未找到匹配词条，测试版不会用未经确认的内容代替词典译文。</p></section>`;
+        ? `<section class="translation-output empty-translation"><span class="translation-mode">暂未匹配到词条译义</span><p>已找到相关词典页面，可在下方展开作为后续查阅参考；当前测试版尚未接入整句翻译引擎。</p></section>`
+      : `<section class="translation-output empty-translation"><span class="translation-mode">暂未找到可用译义</span><p>当前词典没有匹配词条；测试版尚未接入整句翻译引擎。你可以稍后展开词典页面候选查看。</p></section>`;
   const evidenceHtml = matches.length ? `<details class="translation-evidence"><summary>查看词典依据 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>` : '';
   const pageHtml = pageHits.map(({ page, snippet }) => `<article class="ocr-hit"><div><strong>${escapeHtml(page.source)} · 扫描顺序第 ${page.scanPage} 页</strong><span>${pageTextLabel(page)} · 尚未逐条校对</span><p>${escapeHtml(snippet)}</p></div><button class="secondary-button" type="button" data-reader-open="${page.scanPage}" data-reader-dictionary="${escapeHtml(page.dictionaryId)}">查看原页</button></article>`).join('');
   $('#section-title').textContent = state.view === 'pinned' ? '收藏的词条' : '词典查证与来源';
   $('#main-provider').textContent = '译文优先 · 词典作为来源';
-  $('#main-result-note').textContent = `来源：${dictionaryRepository.selectedBooks().map(book => book.title).join('、')}`;
-  const candidateEvidence = candidates.length ? `<details class="translation-evidence" open><summary>原书词条候选 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term)).join('')}</details>` : '';
-  $('#main-result').innerHTML = `${translationHtml}${evidenceHtml}${candidateEvidence}${pageHits.length ? `<details class="translation-evidence ocr-evidence" ${matches.length || candidates.length ? '' : 'open'}><summary>查看词典候选页 · ${pageHits.length} 页</summary>${pageHtml}</details>` : ''}`;
-  $('#main-copy').disabled = !matches.length;
+  $('#main-result-note').textContent = candidates.length ? '先看自动整理释义；原书核对可稍后进行' : `译义来源：${dictionaryRepository.selectedBooks().map(book => book.title).join('、')}`;
+  const candidateEvidence = candidates.length ? `<details class="translation-evidence"><summary>稍后核对原书摘录 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term)).join('')}</details>` : '';
+  $('#main-result').innerHTML = `${translationHtml}${evidenceHtml}${candidateEvidence}${pageHits.length ? `<details class="translation-evidence ocr-evidence"><summary>稍后查看相关原书页面 · ${pageHits.length} 页</summary>${pageHtml}</details>` : ''}`;
+  $('#main-copy').disabled = !copyableTerms.length;
   $('#main-result').querySelectorAll('[data-reader-open]').forEach(button => button.addEventListener('click', () => showReaderPage(Number(button.dataset.readerOpen), button.dataset.readerDictionary)));
   renderTerms();
   try {
@@ -154,12 +153,10 @@ async function lookupInto(input, result, button, isMain = false) {
     await new Promise(resolve => setTimeout(resolve, 100));
     const { matches, candidates, pageHits } = resultFor(text, true, isMain);
     if (!isMain) {
-      result.innerHTML = matches.length
-        ? `<section class="translation-output"><span class="translation-mode">模拟译文 · 来自已核对词典词条</span>${matches.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">${escapeHtml(term.source)} · 页码 ${escapeHtml(term.page || "待核对")}</small></p>`).join('')}</section><details class="translation-evidence"><summary>查看词典出处 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>`
-        : candidates.length
-          ? `<section class="translation-output tentative"><span class="translation-mode">命中原书词条，释义待核对</span><p>打开原书页面核对后再采用其中译义。</p></section>${candidates.map(term => renderCandidate(term, true)).join('')}<button class="secondary-button quick-to-main" id="quick-to-main">查看完整词典依据</button>`
-          : pageHits.length
-            ? `<section class="translation-output tentative"><span class="translation-mode">${pageHitsLabel(pageHits)}，译义待核对</span><p>打开原书页核对后再采用译义。</p></section><button class="secondary-button quick-to-main" id="quick-to-main">查看词典候选与原书页</button>`
+      result.innerHTML = matches.length || candidates.length
+        ? `<section class="translation-output ${candidates.length ? 'tentative' : ''}"><span class="translation-mode">${matches.length && candidates.length ? '词典译义 · 含待核对摘录' : candidates.length ? '词典译义 · 自动整理，待核对' : '模拟译义 · 来自已核对词典词条'}</span>${matches.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">已核对 · ${escapeHtml(term.source)}</small></p>`).join('')}${candidates.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">自动整理摘录 · 尚未逐条核对 · ${escapeHtml(term.source)}</small></p>`).join('')}</section>${matches.length ? `<details class="translation-evidence"><summary>稍后查看词典出处 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>` : ''}${candidates.length ? `<details class="translation-evidence"><summary>稍后核对原书摘录 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term, true)).join('')}</details>` : ''}`
+      : pageHits.length
+            ? `<section class="translation-output empty-translation"><span class="translation-mode">暂未匹配到词条译义</span><p>已找到相关词典页面，可在主页面稍后展开查阅；当前测试版尚未接入整句翻译引擎。</p></section><button class="secondary-button quick-to-main" id="quick-to-main">稍后查看相关词典页面</button>`
           : '<section class="translation-output empty-translation"><span class="translation-mode">尚无可用译义</span><p>当前测试版未找到已确认的词典译义。</p></section><button class="secondary-button quick-to-main" id="quick-to-main">打开全书词典查证</button>';
       $('#quick-to-main')?.addEventListener('click', () => { quickModal.close(); $('#main-input').value = text; $('#main-input').focus(); });
     }
@@ -361,3 +358,4 @@ for (const result of [$('#main-result'), $('#translation-result')]) result.addEv
   const source = event.target.closest('[data-source-open]');
   if (source) openSource(source.dataset.sourceOpen);
 });
+
