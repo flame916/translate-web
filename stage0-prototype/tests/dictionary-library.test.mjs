@@ -35,6 +35,7 @@ test('single-book filtering and page routing cannot cross dictionary boundaries'
   const library = new DictionaryLibrary();
   const data = fixture();
   await library.load(async path => data[path]);
+  await library.loadPageIndexes(async path => data[path]);
   assert.equal(library.searchPages('bank').length, 2);
   assert.equal(library.page(1, 'book-a').imageUrl, './assets/book-a/one.jpeg');
   assert.equal(library.page(1, 'book-b').imageUrl, './assets/book-b/one.jpeg');
@@ -48,15 +49,56 @@ test('single-book filtering and page routing cannot cross dictionary boundaries'
 test('one missing book reports failure and keeps another book usable', async () => {
   const library = new DictionaryLibrary();
   const data = fixture();
-  await library.load(async path => { if (path === 'pages-b') throw new Error('missing'); return data[path]; });
+  await library.load(async path => { if (path === 'entries-b') throw new Error('missing'); return data[path]; });
   assert.equal(library.loadErrors[0].title, '测试词典乙');
   assert.equal(library.lookup('bank')[0].source, '测试词典甲');
+});
+
+test('scan indexes are fetched only when requested', async () => {
+  const library = new DictionaryLibrary();
+  const data = fixture();
+  const fetched = [];
+  await library.load(async path => { fetched.push(path); return data[path]; });
+  assert.equal(fetched.some(path => path.startsWith('pages-')), false);
+  assert.equal(library.pageIndexesReady, false);
+  await library.loadPageIndexes(async path => { fetched.push(path); return data[path]; });
+  assert.equal(fetched.filter(path => path.startsWith('pages-')).length, 2);
+  assert.equal(library.pageIndexesReady, true);
+});
+
+test('a missing scan index can be retried without reloading working indexes', async () => {
+  const library = new DictionaryLibrary();
+  const data = fixture();
+  await library.load(async path => data[path]);
+  await library.loadPageIndexes(async path => {
+    if (path === 'pages-b') throw new Error('offline');
+    return data[path];
+  });
+  assert.equal(library.pageIndexesReady, false);
+  assert.equal(library.pageLoadErrors[0].title, '测试词典乙');
+  const retried = [];
+  await library.loadPageIndexes(async path => { retried.push(path); return data[path]; });
+  assert.equal(library.pageIndexesReady, true);
+  assert.deepEqual(retried, ['pages-b']);
+  assert.equal(library.totalPageCount(), 2);
+});
+
+test('a failed retry does not discard dictionaries that were already loaded', async () => {
+  const library = new DictionaryLibrary();
+  const data = fixture();
+  await library.load(async path => data[path]);
+  await assert.rejects(library.load(async path => {
+    if (path !== './assets/dictionary-library.json') throw new Error('offline');
+    return data[path];
+  }), /没有可载入的词典/);
+  assert.equal(library.lookup('bank').length, 2);
 });
 
 test('both imported books keep their scans and existing pinned identifiers after externalization', async () => {
   const library = new DictionaryLibrary();
   const appRoot = new URL('../', import.meta.url);
   await library.load(async path => JSON.parse(await readFile(new URL(path, appRoot), 'utf8')));
+  await library.loadPageIndexes(async path => JSON.parse(await readFile(new URL(path, appRoot), 'utf8')));
   assert.equal(library.totalPageCount(), 1076);
   library.select('english-etymology');
   assert.equal(library.totalPageCount(), 484);
@@ -70,4 +112,3 @@ test('both imported books keep their scans and existing pinned identifiers after
   assert.match(hello.meaning, /喂/);
   assert.equal(library.lookup('hello').length, 0, 'the imported hello entry stays separate until reviewed');
 });
-
