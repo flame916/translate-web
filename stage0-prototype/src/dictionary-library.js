@@ -8,10 +8,15 @@ export class DictionaryLibrary {
     this.scope = 'all';
     this.readerId = '';
     this.loadErrors = [];
+    this.pageLoadErrors = [];
+    this.pageIndexesReady = false;
+    this.pageIndexesPromise = null;
   }
 
   async load(fetchData = async path => {
-    const response = await fetch(path, { cache: 'no-store' });
+    // Let the browser reuse static dictionary assets between visits. Deployments
+    // still revalidate according to the server's normal cache headers.
+    const response = await fetch(path, { cache: 'default' });
     if (!response.ok) throw new Error(`加载失败：${path} (${response.status})`);
     return response.json();
   }) {
@@ -20,11 +25,8 @@ export class DictionaryLibrary {
     const enabled = catalog.dictionaries.filter(book => book.enabled !== false).sort((a, b) => (b.priority || 0) - (a.priority || 0));
     if (new Set(enabled.map(book => book.id)).size !== enabled.length) throw new Error('词典目录存在重复标识');
     const results = await Promise.allSettled(enabled.map(async book => {
-      const [entries, index] = await Promise.all([
-        book.entriesPath ? fetchData(book.entriesPath) : [],
-        book.indexPath ? fetchData(book.indexPath) : { pages: [] }
-      ]);
-      if (!Array.isArray(entries) || !Array.isArray(index.pages)) throw new Error('词条或页面格式不正确');
+      const entries = book.entriesPath ? await fetchData(book.entriesPath) : [];
+      if (!Array.isArray(entries)) throw new Error('词条格式不正确');
       return {
         ...book,
         entries: entries.map(entry => ({
@@ -35,21 +37,55 @@ export class DictionaryLibrary {
           author: book.authors,
           reviewed: entry.reviewed === true
         })),
-        pages: index.pages.map(page => ({
+        pages: []
+      };
+    }));
+    const loadedBooks = results.filter(result => result.status === 'fulfilled').map(result => result.value);
+    this.loadErrors = results.flatMap((result, i) => result.status === 'rejected' ? [{ title: enabled[i].title, message: String(result.reason) }] : []);
+    if (!loadedBooks.length) throw new Error('没有可载入的词典');
+    this.books = loadedBooks;
+    if (this.scope !== 'all' && !this.books.some(book => book.id === this.scope)) this.scope = 'all';
+    this.readerId = this.books[0].id;
+    this.pageIndexesReady = false;
+    this.pageIndexesPromise = null;
+    this.pageLoadErrors = [];
+    return { pages: [] };
+  }
+
+  async loadPageIndexes(fetchData = async path => {
+    const response = await fetch(path, { cache: 'default' });
+    if (!response.ok) throw new Error(`加载失败：${path} (${response.status})`);
+    return response.json();
+  }) {
+    if (this.pageIndexesReady && !this.pageLoadErrors.length) return { pages: this.books.flatMap(book => book.pages) };
+    if (this.pageIndexesPromise) return this.pageIndexesPromise;
+    this.pageIndexesPromise = (async () => {
+      const pendingBooks = this.books.filter(book => book.indexPath && !book.pages.length);
+      const results = await Promise.allSettled(pendingBooks.map(async book => {
+        const index = book.indexPath ? await fetchData(book.indexPath) : { pages: [] };
+        if (!Array.isArray(index.pages)) throw new Error('页面索引格式不正确');
+        return { book, pages: index.pages.map(page => ({
           ...page,
           dictionaryId: book.id,
           source: book.title,
           author: book.authors,
           imageUrl: page.file ? `${book.imageBase}${page.file}` : ''
-        }))
-      };
-    }));
-    this.books = results.filter(result => result.status === 'fulfilled').map(result => result.value);
-    this.loadErrors = results.flatMap((result, i) => result.status === 'rejected' ? [{ title: enabled[i].title, message: String(result.reason) }] : []);
-    if (!this.books.length) throw new Error('没有可载入的词典');
-    if (this.scope !== 'all' && !this.books.some(book => book.id === this.scope)) this.scope = 'all';
-    this.readerId = this.books[0].id;
-    return { pages: this.books.flatMap(book => book.pages) };
+        })) };
+      }));
+      const loaded = results.filter(result => result.status === 'fulfilled');
+      this.pageLoadErrors = results.flatMap((result, index) => result.status === 'rejected'
+        ? [{ title: pendingBooks[index].title, message: String(result.reason) }]
+        : []);
+      if (!loaded.length && !this.books.some(book => book.pages.length)) throw new Error('没有可载入的词典页面');
+      loaded.forEach(result => { result.value.book.pages = result.value.pages; });
+      this.pageIndexesReady = this.pageLoadErrors.length === 0;
+      if (!this.pageIndexesReady) this.pageIndexesPromise = null;
+      return { pages: this.books.flatMap(book => book.pages) };
+    })().catch(error => {
+      this.pageIndexesPromise = null;
+      throw error;
+    });
+    return this.pageIndexesPromise;
   }
 
   dictionaries() { return this.books; }
