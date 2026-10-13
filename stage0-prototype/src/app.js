@@ -3,7 +3,7 @@ import { lookupBasicTranslations } from './basic-translation.js';
 import { icon, mountIcons, setBusy, createToast, createModal } from '../../ui-toolkit/components.js';
 
 const $ = selector => document.querySelector(selector);
-const state = { view: 'library', query: '', showMatches: false, ...termRepository.list(), history: historyRepository.list(), currentMatches: [], pageHits: [], currentTranslation: '', readerPage: 10, indexReady: false };
+const state = { view: 'library', query: '', showMatches: false, ...termRepository.list(), history: historyRepository.list(), currentMatches: [], pageHits: [], currentTranslation: '', readerPage: 10, indexReady: false, pageIndexReady: false };
 const grid = $('#term-grid');
 const showToast = createToast($('#toast'));
 const quickModal = createModal($('#quick-overlay'), $('.app-shell'), $('#quick-input'));
@@ -46,7 +46,9 @@ function renderTranslationSections(basicMatches, matches, candidates) {
   const basicSection = basicMatches.length
     ? `<section class="translation-output basic-translation"><span class="translation-mode">基础常用译法 · 内置词条</span>${basicMatches.map(entry => `<p><strong>${escapeHtml(entry.phrase)}</strong><span>${escapeHtml(entry.translation)}</span><small class="translation-citation">${escapeHtml(entry.usage)} · 暂不依赖原书核对</small></p>`).join('')}</section>`
     : '<section class="translation-output empty-translation"><span class="translation-mode">基础常用译法</span><p>目前的内置基础词条尚未收录这段内容。</p></section>';
-  const dictionarySection = matches.length || candidates.length
+  const dictionarySection = !state.indexReady
+    ? `<section class="translation-output empty-translation"><span class="translation-mode">导入词典释义 · 正在载入</span><p>基础常用译法已先行显示；词典载入完成后会自动补充原书释义与出处。</p></section>`
+    : matches.length || candidates.length
     ? `<section class="translation-output dictionary-translation ${candidates.length ? 'tentative' : ''}"><span class="translation-mode">导入词典释义${candidates.length ? ' · 自动整理，待核对' : ' · 已核对词条'}</span>${matches.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">已核对 · ${escapeHtml(term.source)}</small></p>`).join('')}${candidates.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">自动整理摘录 · 尚未逐条核对 · ${escapeHtml(term.source)}</small></p>`).join('')}</section>`
     : '<section class="translation-output empty-translation"><span class="translation-mode">导入词典释义</span><p>当前查询没有匹配到词典词条；可稍后查看相关原书页面。</p></section>';
   return basicSection + dictionarySection;
@@ -65,8 +67,18 @@ function visibleTerms() {
 }
 
 function renderTerms() {
+  if (!state.indexReady && state.view !== 'history') {
+    $('#result-count').textContent = state.dictionaryLoadFailed ? '词典暂不可用' : '词典后台载入中';
+    grid.innerHTML = `<div class="empty-state">${state.dictionaryLoadFailed ? '基础常用译法仍可查询；词典资料载入失败后，可点上方“重试载入词典”。' : '基础常用译法已经可以查询，词典条目正在后台载入。'}</div>`;
+    return;
+  }
+  if (state.query.trim() && state.indexReady && !state.pageIndexReady && state.view === 'library') {
+    $('#result-count').textContent = state.pageIndexFailed ? '全文索引暂不可用' : '全文索引按需载入中';
+    grid.innerHTML = `<div class="empty-state">${state.pageIndexFailed ? '原书全文索引载入失败；基础译法和词条仍可用，请点击“重试载入词典”。' : '词条已经可查；原书全文候选会在索引载入后显示。'}</div>`;
+    return;
+  }
   const queryText = state.query.trim();
-  if (queryText && state.indexReady && state.view === 'library') {
+  if (queryText && state.indexReady && state.pageIndexReady && state.view === 'library') {
     const candidates = dictionaryRepository.lookupCandidates(queryText);
     const hits = dictionaryRepository.searchPages(queryText, 30);
     $('#result-count').textContent = `${candidates.length} 条原书词条 · ${hits.length} 张词典页命中`;
@@ -131,7 +143,7 @@ function resultFor(text, record = true, updateMain = true) {
   const pageHtml = pageHits.map(({ page, snippet }) => `<article class="ocr-hit"><div><strong>${escapeHtml(page.source)} · 扫描顺序第 ${page.scanPage} 页</strong><span>${pageTextLabel(page)} · 尚未逐条校对</span><p>${escapeHtml(snippet)}</p></div><button class="secondary-button" type="button" data-reader-open="${page.scanPage}" data-reader-dictionary="${escapeHtml(page.dictionaryId)}">查看原页</button></article>`).join('');
   $('#section-title').textContent = state.view === 'pinned' ? '收藏的词条' : '词典查证与来源';
   $('#main-provider').textContent = basicMatches.length ? '基础译法 + 词典释义' : '基础译法库 + 词典作为来源';
-  $('#main-result-note').textContent = basicMatches.length ? '复制时优先复制基础常用译法' : candidates.length ? '自动整理释义与基础译法分开展示' : '基础常用译法与词典释义分开展示';
+  $('#main-result-note').textContent = !state.indexReady ? '基础译法已显示，词典资料载入后自动补充' : basicMatches.length ? '复制时优先复制基础常用译法' : candidates.length ? '自动整理释义与基础译法分开展示' : '基础常用译法与词典释义分开展示';
   const candidateEvidence = candidates.length ? `<details class="translation-evidence"><summary>稍后核对原书摘录 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term)).join('')}</details>` : '';
   $('#main-result').innerHTML = `${translationHtml}${evidenceHtml}${candidateEvidence}${pageHits.length ? `<details class="translation-evidence ocr-evidence"><summary>稍后查看相关原书页面 · ${pageHits.length} 页</summary>${pageHtml}</details>` : ''}`;
   $('#main-copy').disabled = !copyableTerms.length;
@@ -141,6 +153,13 @@ function resultFor(text, record = true, updateMain = true) {
     if (state.view === 'history') renderHistory();
   } catch { showToast('查询完成，但本机记录未能保存'); }
   return { basicMatches, matches, candidates, pageHits };
+}
+
+function renderQuickResult(text, queryResult = resultFor(text, false, false)) {
+  const { basicMatches, matches, candidates, pageHits } = queryResult;
+  const result = $('#translation-result');
+  result.innerHTML = `${renderTranslationSections(basicMatches, matches, candidates)}${matches.length ? `<details class="translation-evidence"><summary>稍后查看词典出处 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>` : ''}${candidates.length ? `<details class="translation-evidence"><summary>稍后核对原书摘录 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term, true)).join('')}</details>` : ''}${state.indexReady && !basicMatches.length && !matches.length && !candidates.length ? `<button class="secondary-button quick-to-main" id="quick-to-main">${pageHits.length ? '稍后查看相关词典页面' : '打开全书词典查找'}</button>` : ''}`;
+  $('#quick-to-main')?.addEventListener('click', () => { quickModal.close(); $('#main-input').value = text; $('#main-input').focus(); });
 }
 
 async function lookupInto(input, result, button, isMain = false) {
@@ -162,9 +181,11 @@ async function lookupInto(input, result, button, isMain = false) {
     await new Promise(resolve => setTimeout(resolve, 100));
     const { basicMatches, matches, candidates, pageHits } = resultFor(text, true, isMain);
     if (!isMain) {
-      result.innerHTML = `${renderTranslationSections(basicMatches, matches, candidates)}${matches.length ? `<details class="translation-evidence"><summary>稍后查看词典出处 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>` : ''}${candidates.length ? `<details class="translation-evidence"><summary>稍后核对原书摘录 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term, true)).join('')}</details>` : ''}${!basicMatches.length && !matches.length && !candidates.length ? `<button class="secondary-button quick-to-main" id="quick-to-main">${pageHits.length ? '稍后查看相关词典页面' : '打开全书词典查找'}</button>` : ''}`;
-      $('#quick-to-main')?.addEventListener('click', () => { quickModal.close(); $('#main-input').value = text; $('#main-input').focus(); });
+      state.lastQuickText = text;
+      renderQuickResult(text, { basicMatches, matches, candidates, pageHits });
     }
+    if (state.indexReady) loadPageIndexData().catch(() => {});
+    else loadDictionaryData().catch(() => {});
   } catch {
     if (isMain) $('#main-result').textContent = '本机词典暂时无法查询，请重试。';
     else result.textContent = '本机词典暂时无法查询，请重试。';
@@ -176,7 +197,14 @@ async function lookupInto(input, result, button, isMain = false) {
   }
 }
 
-$('#search-input').addEventListener('input', event => { state.query = event.target.value; render(); });
+$('#search-input').addEventListener('input', event => {
+  state.query = event.target.value;
+  render();
+  if (state.query.trim() && !state.pageIndexReady) {
+    if (state.indexReady) loadPageIndexData().catch(() => {});
+    else loadDictionaryData().catch(() => {});
+  }
+});
 grid.addEventListener('click', event => {
   const pin = event.target.closest('[data-pin]');
   if (pin) {
@@ -217,6 +245,16 @@ function openSource(id) {
 }
 
 function showReaderPage(scanPage, dictionaryId = dictionaryRepository.readerId) {
+  if (!state.indexReady) {
+    $('#reader-status').textContent = '正在载入词典词条，随后会载入原书页索引…';
+    loadDictionaryData().then(() => showReaderPage(scanPage, dictionaryId)).catch(() => {});
+    return;
+  }
+  if (!state.pageIndexReady) {
+    $('#reader-status').textContent = '正在按需载入原书页面索引…';
+    loadPageIndexData().then(() => showReaderPage(scanPage, dictionaryId)).catch(() => {});
+    return;
+  }
   dictionaryRepository.selectReader(dictionaryId);
   $('#reader-dictionary').value = dictionaryId;
   const count = dictionaryRepository.pageCount();
@@ -319,9 +357,18 @@ $('#main-input').addEventListener('keydown', event => { if ((event.ctrlKey || ev
 $('#quick-input').addEventListener('keydown', event => { if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') $('#translate-button').click(); });
 
 renderTerms();
-$('#main-lookup').disabled = true;
-$('#translate-button').disabled = true;
-dictionaryRepository.loadIndex().then(index => {
+// Basic translations are bundled with the app, so keep both query paths usable
+// while the larger dictionary and scan indexes load in the background.
+$('#main-lookup').disabled = false;
+$('#translate-button').disabled = false;
+let dictionaryLoadPromise = null;
+let pageIndexLoadPromise = null;
+async function loadDictionaryData() {
+  if (dictionaryLoadPromise) return dictionaryLoadPromise;
+  state.dictionaryLoadFailed = false;
+  $('#dictionary-retry').hidden = true;
+  $('#dictionary-load-status').textContent = '基础常用译法已可用；正在后台载入词条…';
+  dictionaryLoadPromise = dictionaryRepository.loadIndex().then(index => {
   state.indexReady = true;
   Object.assign(state, termRepository.list());
   const books = dictionaryRepository.dictionaries();
@@ -332,16 +379,88 @@ dictionaryRepository.loadIndex().then(index => {
   $('#reader-dictionary').disabled = false;
   $('#main-lookup').disabled = false;
   $('#translate-button').disabled = false;
-  $('.coverage-badge').innerHTML = `<span class="status-dot"></span>${books.length} 本词典 · ${index.pages.length} 页已载入`;
-  if (dictionaryRepository.loadErrors.length) showToast(dictionaryRepository.loadErrors.map(error => `${error.title}：${error.message}`).join('；'));
+  $('.coverage-badge').innerHTML = `<span class="status-dot"></span>${books.length} 本词典 · 全文索引按需载入`;
+  $('#dictionary-load-status').textContent = dictionaryRepository.loadErrors.length
+    ? `已载入 ${books.length} 本词典，另有 ${dictionaryRepository.loadErrors.length} 本未能载入。`
+    : `词条已就绪：${books.length} 本词典；原书全文索引会在查阅时载入。`;
+  if (dictionaryRepository.loadErrors.length) {
+    dictionaryLoadPromise = null;
+    $('#dictionary-retry').hidden = false;
+    showToast(dictionaryRepository.loadErrors.map(error => `${error.title}：${error.message}`).join('；'));
+  }
   updateDictionaryLabels();
-  showReaderPage(Math.min(10, books[0].pages.length) || 1);
+  $('#reader-status').textContent = '词典词条已载入；首次查阅原书页面时再载入全文索引。';
   render();
-}).catch(error => {
-  console.error(error);
-  $('#reader-status').textContent = '词典库未能载入，请通过本机预览服务打开测试版。';
-  showToast('词典库载入失败');
+  if (state.lastText) resultFor(state.lastText, false);
+  if (state.lastQuickText) renderQuickResult(state.lastQuickText);
+  if (state.lastText || state.lastQuickText || state.query.trim()) loadPageIndexData().catch(() => {});
+  return index;
+  }).catch(error => {
+    console.error(error);
+    state.dictionaryLoadFailed = true;
+    $('#dictionary-load-status').textContent = '词典载入失败；基础常用译法仍可使用，请检查网络后重试。';
+    $('#dictionary-retry').hidden = false;
+    $('#reader-status').textContent = '词典库未能载入。请检查网络后重试。';
+    render();
+    showToast('词典载入失败；基础常用译法仍可用');
+    dictionaryLoadPromise = null;
+    throw error;
+  });
+  return dictionaryLoadPromise;
+}
+async function loadPageIndexData() {
+  if (state.pageIndexReady && !dictionaryRepository.pageLoadErrors.length) return { pages: dictionaryRepository.dictionaries().flatMap(book => book.pages) };
+  if (!state.indexReady) return loadDictionaryData().then(() => loadPageIndexData());
+  if (pageIndexLoadPromise) return pageIndexLoadPromise;
+  state.pageIndexFailed = false;
+  $('#dictionary-retry').hidden = true;
+  $('#dictionary-load-status').textContent = '基础译法和词条已可用；正在载入原书全文索引…';
+  pageIndexLoadPromise = dictionaryRepository.loadPageIndexes().then(index => {
+    state.pageIndexReady = index.pages.length > 0;
+    state.pageIndexFailed = dictionaryRepository.pageLoadErrors.length > 0;
+    $('#dictionary-load-status').textContent = dictionaryRepository.pageLoadErrors.length
+      ? `全文索引已部分载入：${index.pages.length} 页，${dictionaryRepository.pageLoadErrors.length} 本词典未完成。`
+      : `全文索引已载入：${index.pages.length} 页。`;
+    $('.coverage-badge').innerHTML = `<span class="status-dot"></span>${dictionaryRepository.dictionaries().length} 本词典 · ${index.pages.length} 页已载入`;
+    const readerPageCount = dictionaryRepository.pageCount();
+    $('#reader-page').max = Math.max(1, readerPageCount);
+    $('#reader-page').value = 1;
+    $('#reader-page').disabled = !readerPageCount;
+    $('#reader-go').disabled = !readerPageCount;
+    $('#reader-prev').disabled = true;
+    $('#reader-next').disabled = readerPageCount <= 1;
+    $('#reader-view-source').disabled = true;
+    $('#reader-total').textContent = `/ ${readerPageCount}`;
+    $('#reader-status').textContent = `原书页索引已就绪：${readerPageCount} 页；输入页码后打开。`;
+    if (dictionaryRepository.pageLoadErrors.length) {
+      pageIndexLoadPromise = null;
+      $('#dictionary-retry').hidden = false;
+    }
+    render();
+    if (state.lastText) resultFor(state.lastText, false);
+    if (state.lastQuickText) renderQuickResult(state.lastQuickText);
+    return index;
+  }).catch(error => {
+    console.error(error);
+    state.pageIndexFailed = true;
+    $('#dictionary-load-status').textContent = '原书全文索引未能载入；基础译法和词条仍可用。请检查网络后重试。';
+    $('#dictionary-retry').hidden = false;
+    $('#reader-status').textContent = '原书页面索引未能载入。请检查网络后重试。';
+    render();
+    showToast('原书索引载入失败；词条查询仍可用');
+    pageIndexLoadPromise = null;
+    throw error;
+  });
+  return pageIndexLoadPromise;
+}
+$('#dictionary-retry').addEventListener('click', () => {
+  const retry = !state.indexReady || dictionaryRepository.loadErrors.length ? loadDictionaryData() : loadPageIndexData();
+  retry.catch(() => {});
 });
+// Let the first paint and any immediate basic lookup happen before starting the
+// larger downloads. The input remains responsive while they parse and index.
+if ('requestIdleCallback' in window) window.requestIdleCallback(() => loadDictionaryData().catch(() => {}), { timeout: 1200 });
+else window.setTimeout(() => loadDictionaryData().catch(() => {}), 150);
 
 function updateDictionaryLabels() {
   const selected = dictionaryRepository.selectedBooks();
@@ -365,4 +484,3 @@ for (const result of [$('#main-result'), $('#translation-result')]) result.addEv
   const reader = event.target.closest('[data-reader-open]');
   if (reader) showReaderPage(Number(reader.dataset.readerOpen), reader.dataset.readerDictionary);
 });
-
