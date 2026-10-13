@@ -50,7 +50,7 @@ function renderTranslationSections(basicMatches, matches, candidates) {
     ? `<section class="translation-output empty-translation"><span class="translation-mode">导入词典释义 · 正在载入</span><p>基础常用译法已先行显示；词典载入完成后会自动补充原书释义与出处。</p></section>`
     : matches.length || candidates.length
     ? `<section class="translation-output dictionary-translation ${candidates.length ? 'tentative' : ''}"><span class="translation-mode">导入词典释义${candidates.length ? ' · 自动整理，待核对' : ' · 已核对词条'}</span>${matches.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">已核对 · ${escapeHtml(term.source)}</small></p>`).join('')}${candidates.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">自动整理摘录 · 尚未逐条核对 · ${escapeHtml(term.source)}</small></p>`).join('')}</section>`
-    : '<section class="translation-output empty-translation"><span class="translation-mode">导入词典释义</span><p>当前查询没有匹配到词典词条；可稍后查看相关原书页面。</p></section>';
+    : `<section class="translation-output empty-translation"><span class="translation-mode">导入词典释义</span><p>当前查询没有匹配到词条；${state.pageIndexReady ? '全文索引中也没有相关页面。' : state.pageIndexLoading ? '正在查找原书全文索引…' : state.pageIndexFailed ? '原书全文索引暂不可用，请使用上方重试。' : '可以按需搜索原书全文。'}</p>${!state.pageIndexReady && !state.pageIndexLoading && !state.pageIndexFailed ? '<button class="secondary-button" type="button" data-load-page-index>搜索原书全文</button>' : ''}</section>`;
   return basicSection + dictionarySection;
 }
 
@@ -184,8 +184,7 @@ async function lookupInto(input, result, button, isMain = false) {
       state.lastQuickText = text;
       renderQuickResult(text, { basicMatches, matches, candidates, pageHits });
     }
-    if (state.indexReady) loadPageIndexData().catch(() => {});
-    else loadDictionaryData().catch(() => {});
+    if (!state.indexReady) loadDictionaryData().catch(() => {});
   } catch {
     if (isMain) $('#main-result').textContent = '本机词典暂时无法查询，请重试。';
     else result.textContent = '本机词典暂时无法查询，请重试。';
@@ -393,7 +392,7 @@ async function loadDictionaryData() {
   render();
   if (state.lastText) resultFor(state.lastText, false);
   if (state.lastQuickText) renderQuickResult(state.lastQuickText);
-  if (state.lastText || state.lastQuickText || state.query.trim()) loadPageIndexData().catch(() => {});
+  if (state.query.trim()) loadPageIndexData().catch(() => {});
   return index;
   }).catch(error => {
     console.error(error);
@@ -413,9 +412,11 @@ async function loadPageIndexData() {
   if (!state.indexReady) return loadDictionaryData().then(() => loadPageIndexData());
   if (pageIndexLoadPromise) return pageIndexLoadPromise;
   state.pageIndexFailed = false;
+  state.pageIndexLoading = true;
   $('#dictionary-retry').hidden = true;
   $('#dictionary-load-status').textContent = '基础译法和词条已可用；正在载入原书全文索引…';
   pageIndexLoadPromise = dictionaryRepository.loadPageIndexes().then(index => {
+    state.pageIndexLoading = false;
     state.pageIndexReady = index.pages.length > 0;
     state.pageIndexFailed = dictionaryRepository.pageLoadErrors.length > 0;
     $('#dictionary-load-status').textContent = dictionaryRepository.pageLoadErrors.length
@@ -442,6 +443,7 @@ async function loadPageIndexData() {
     return index;
   }).catch(error => {
     console.error(error);
+    state.pageIndexLoading = false;
     state.pageIndexFailed = true;
     $('#dictionary-load-status').textContent = '原书全文索引未能载入；基础译法和词条仍可用。请检查网络后重试。';
     $('#dictionary-retry').hidden = false;
@@ -479,6 +481,7 @@ $('#dictionary-select').addEventListener('change', event => {
 });
 $('#reader-dictionary').addEventListener('change', event => showReaderPage(1, event.target.value));
 for (const result of [$('#main-result'), $('#translation-result')]) result.addEventListener('click', event => {
+  if (event.target.closest('[data-load-page-index]')) loadPageIndexData().catch(() => {});
   const source = event.target.closest('[data-source-open]');
   if (source) openSource(source.dataset.sourceOpen);
   const reader = event.target.closest('[data-reader-open]');
