@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f6f2" />
     <title>Lexicon · 词典翻译台</title>
-    <link rel="stylesheet" href="./styles.css?v=dictionary-mvp-2" />
+    <link rel="stylesheet" href="./styles.css?v=dictionary-mvp-3" />
   </head>
   <body>
     <div class="app-shell">
@@ -45,6 +45,12 @@
             <span class="privacy-badge"><span class="status-dot"></span>本地查询</span>
           </div>
           <div class="dictionary-controls"><label for="dictionary-select">使用词典</label><select id="dictionary-select" disabled><option>词典载入中…</option></select><span id="dictionary-load-status" role="status" aria-live="polite">基础常用译法已可用，词典正在后台载入。</span><button class="quiet-button" id="dictionary-retry" type="button" hidden>重试载入词典</button></div>
+          <fieldset class="direction-switch" aria-label="翻译方向">
+            <legend>翻译方向</legend>
+            <button type="button" data-direction="auto" aria-pressed="true">自动识别</button>
+            <button type="button" data-direction="en-zh" aria-pressed="false">英译中</button>
+            <button type="button" data-direction="zh-en" aria-pressed="false">中译英</button>
+          </fieldset>
           <div class="translation-grid">
             <div class="editor-pane">
               <div class="pane-head"><label id="main-input-label" for="main-input">英文原文</label><span class="pane-hint">词语 · 短语 · 句子</span></div>
@@ -118,6 +124,6 @@
     </div>
 
     <div class="lx-toast" id="toast" role="status" hidden></div>
-    <script type="module" src="./src/app.js?v=dictionary-mvp-7"></script>
+    <script type="module" src="./src/app.js?v=dictionary-mvp-8"></script>
   </body>
 </html>

@@ -4,7 +4,7 @@ import { isChineseQuery } from './dictionary-library.js';
 import { icon, mountIcons, setBusy, createToast, createModal } from '../../ui-toolkit/components.js';
 
 const $ = selector => document.querySelector(selector);
-const state = { view: 'library', query: '', showMatches: false, ...termRepository.list(), history: historyRepository.list(), currentMatches: [], pageHits: [], currentTranslation: '', readerPage: 10, indexReady: false, pageIndexReady: false };
+const state = { view: 'library', query: '', directionMode: 'auto', effectiveDirection: 'en-zh', showMatches: false, ...termRepository.list(), history: historyRepository.list(), currentMatches: [], pageHits: [], currentTranslation: '', readerPage: 10, indexReady: false, pageIndexReady: false };
 const grid = $('#term-grid');
 const showToast = createToast($('#toast'));
 const quickModal = createModal($('#quick-overlay'), $('.app-shell'), $('#quick-input'));
@@ -13,6 +13,25 @@ mountIcons();
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
+function directionFor(text) {
+  return state.directionMode === 'auto' ? (isChineseQuery(text) ? 'zh-en' : 'en-zh') : state.directionMode;
+}
+
+function setEffectiveDirection(direction) {
+  state.effectiveDirection = direction;
+  const reverse = direction === 'zh-en';
+  $('#main-input-label').textContent = reverse ? '中文原文' : '英文原文';
+  $('#main-input').placeholder = reverse ? '输入中文词语或释义，例如：在船尾地' : "输入要翻译的英文，例如：Aladdin's cave";
+  $('#main-output-label').textContent = reverse ? '英文词条候选' : '中文译文';
+}
+
+function setDirectionMode(mode) {
+  state.directionMode = mode;
+  document.querySelectorAll('[data-direction]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.direction === mode)));
+  setEffectiveDirection(directionFor($('#main-input').value));
+  $('#main-provider').textContent = mode === 'auto' ? '输入后自动识别方向' : mode === 'zh-en' ? '中译英' : '英译中';
 }
 
 function pageTextLabel(page) {
@@ -125,7 +144,7 @@ function render() {
 }
 
 function resultFor(text, record = true, updateMain = true) {
-  const direction = isChineseQuery(text) ? 'zh-en' : 'en-zh';
+  const direction = updateMain ? directionFor(text) : (isChineseQuery(text) ? 'zh-en' : 'en-zh');
   const basicMatches = direction === 'en-zh' ? lookupBasicTranslations(text) : [];
   const matches = direction === 'zh-en' ? dictionaryRepository.reverseLookup(text) : dictionaryRepository.lookup(text);
   const candidates = direction === 'zh-en' ? [] : dictionaryRepository.lookupCandidates(text);
@@ -156,9 +175,7 @@ function resultFor(text, record = true, updateMain = true) {
   const evidenceHtml = matches.length ? `<details class="translation-evidence"><summary>查看词典依据 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>` : '';
   const pageHtml = pageHits.map(({ page, snippet }) => `<article class="ocr-hit"><div><strong>${escapeHtml(page.source)} · 扫描顺序第 ${page.scanPage} 页</strong><span>${pageTextLabel(page)} · 尚未逐条校对</span><p>${escapeHtml(snippet)}</p></div><button class="secondary-button" type="button" data-reader-open="${page.scanPage}" data-reader-dictionary="${escapeHtml(page.dictionaryId)}">查看原页</button></article>`).join('');
   $('#section-title').textContent = state.view === 'pinned' ? '收藏的词条' : '词典查证与来源';
-  $('#main-input-label').textContent = direction === 'zh-en' ? '中文原文' : '英文原文';
-  $('#main-input').placeholder = direction === 'zh-en' ? '输入中文词语或释义，例如：在船尾地' : "输入要翻译的英文，例如：Aladdin's cave";
-  $('#main-output-label').textContent = direction === 'zh-en' ? '英文词条候选' : '中文译文';
+  setEffectiveDirection(direction);
   $('#main-provider').textContent = direction === 'zh-en' ? '中文释义反查 · 词典候选' : basicMatches.length ? '基础译法 + 词典释义' : '基础译法库 + 词典作为来源';
   $('#main-copy-label').textContent = direction === 'zh-en' ? '复制英文候选' : '复制译文';
   $('#main-result-note').textContent = direction === 'zh-en'
@@ -192,8 +209,8 @@ async function lookupInto(input, result, button, isMain = false) {
   if (isMain) {
     $('#main-clear').disabled = true;
     $('#main-clipboard').disabled = true;
-    $('#main-provider').textContent = isChineseQuery(text) ? '正在反查英文词条…' : '正在匹配词典…';
-    $('#main-result').textContent = isChineseQuery(text) ? '正在查找对应英文词条…' : '正在整理词典译义…';
+    $('#main-provider').textContent = directionFor(text) === 'zh-en' ? '正在反查英文词条…' : '正在匹配词典…';
+    $('#main-result').textContent = directionFor(text) === 'zh-en' ? '正在查找对应英文词条…' : '正在整理词典译义…';
   } else {
     result.textContent = isChineseQuery(text) ? '正在查找对应英文词条…' : '正在整理词典译义…';
   }
@@ -348,8 +365,7 @@ $('#main-clear').addEventListener('click', () => {
   if ($('#main-lookup').disabled) return;
   $('#main-input').value = '';
   $('#main-input').removeAttribute('aria-invalid');
-  $('#main-input-label').textContent = '英文原文';
-  $('#main-output-label').textContent = '中文译文';
+  setEffectiveDirection(directionFor(''));
   $('#main-copy-label').textContent = '复制译文';
   $('#main-input').placeholder = "输入要翻译的英文，例如：Aladdin's cave";
   $('#main-result').innerHTML = '<span class="result-placeholder">中文译文会优先显示在这里</span>';
@@ -376,6 +392,10 @@ $('#main-copy').addEventListener('click', async () => {
 
 $('#main-lookup').addEventListener('click', () => lookupInto($('#main-input'), $('#main-result'), $('#main-lookup'), true));
 $('#translate-button').addEventListener('click', () => lookupInto($('#quick-input'), $('#translation-result'), $('#translate-button')));
+document.querySelectorAll('[data-direction]').forEach(button => button.addEventListener('click', () => setDirectionMode(button.dataset.direction)));
+$('#main-input').addEventListener('input', () => {
+  if (state.directionMode === 'auto') setEffectiveDirection(directionFor($('#main-input').value));
+});
 $('#main-input').addEventListener('keydown', event => { if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') $('#main-lookup').click(); });
 $('#quick-input').addEventListener('keydown', event => { if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') $('#translate-button').click(); });
 
