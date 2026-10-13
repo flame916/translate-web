@@ -60,7 +60,7 @@ export class DictionaryLibrary {
     if (this.pageIndexesReady && !this.pageLoadErrors.length) return { pages: this.books.flatMap(book => book.pages) };
     if (this.pageIndexesPromise) return this.pageIndexesPromise;
     this.pageIndexesPromise = (async () => {
-      const pendingBooks = this.books.filter(book => book.indexPath && !book.pages.length);
+      const pendingBooks = this.books.filter(book => !book.pages.length);
       const results = await Promise.allSettled(pendingBooks.map(async book => {
         const index = book.indexPath ? await fetchData(book.indexPath) : { pages: [] };
         if (!Array.isArray(index.pages)) throw new Error('页面索引格式不正确');
