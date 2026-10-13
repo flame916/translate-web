@@ -1,5 +1,8 @@
 // Dictionary books, entries and scans are content data, independent of UI suppliers.
 const normalize = text => String(text || '').toLowerCase().replace(/[’‘]/g, "'").replace(/\s+/g, ' ').trim();
+const normalizeChineseSearch = text => String(text || '').toLowerCase().normalize('NFKC').replace(/[\s\p{P}\p{S}]+/gu, '');
+const dictionaryDefinition = text => String(text || '').replace(/〔[^〕]*〕|【[^】]*】|（[^）]*）|\([^)]*\)|\[[^\]]*\]/g, ' ');
+export const isChineseQuery = text => /[\u3400-\u9fff]/u.test(String(text || ''));
 const escapeRegex = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export class DictionaryLibrary {
@@ -112,6 +115,13 @@ export class DictionaryLibrary {
     const query = normalize(text);
     if (!query) return [];
     return this.list().filter(entry => !entry.reviewed && normalize(entry.word) === query);
+  }
+  reverseLookup(text, limit = 30) {
+    const query = normalizeChineseSearch(text);
+    if ([...query].filter(char => /[\u3400-\u9fff]/u.test(char)).length < 2) return [];
+    return this.list().filter(entry => entry.word && entry.meaning && normalizeChineseSearch(dictionaryDefinition(entry.meaning)).includes(query))
+      .sort((a, b) => Number(b.reviewed) - Number(a.reviewed) || a.meaning.length - b.meaning.length)
+      .slice(0, limit);
   }
   searchPages(text, limit = 12) {
     const query = normalize(text);

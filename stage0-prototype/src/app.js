@@ -1,5 +1,6 @@
 import { desktopAdapter, dictionaryRepository, historyRepository, termRepository } from './adapters.js';
 import { lookupBasicTranslations } from './basic-translation.js';
+import { isChineseQuery } from './dictionary-library.js';
 import { icon, mountIcons, setBusy, createToast, createModal } from '../../ui-toolkit/components.js';
 
 const $ = selector => document.querySelector(selector);
@@ -42,7 +43,15 @@ function renderCandidate(term, compact = false) {
   return `<article class="lookup-entry pending-entry"><div class="lookup-term-head"><div><h3>${escapeHtml(term.word)}</h3></div><span class="term-status">原书词条 · 待校对</span></div><div class="definition-block"><span class="field-label">原书文字层摘录</span><p>${escapeHtml(term.meaning)}</p></div><div class="entry-source"><span>${escapeHtml(term.source)} · ${origin}</span>${term.scanPage ? `<button class="secondary-button" type="button" data-reader-open="${Number(term.scanPage)}" data-reader-dictionary="${escapeHtml(term.dictionaryId)}">核对原书页</button>` : ''}</div></article>`;
 }
 
-function renderTranslationSections(basicMatches, matches, candidates) {
+function renderTranslationSections(basicMatches, matches, candidates, direction = 'en-zh') {
+  if (direction === 'zh-en') {
+    const dictionarySection = !state.indexReady
+      ? '<section class="translation-output empty-translation"><span class="translation-mode">中文释义反查英文 · 正在载入词典</span><p>词典载入后会按中文释义查找英文词条。</p></section>'
+      : matches.length
+      ? `<section class="translation-output dictionary-translation tentative"><span class="translation-mode">中文释义反查英文 · 词典候选${matches.some(term => term.reviewed) ? ' · 含已核对词条' : ' · 待核对'}</span>${matches.map(term => `<p><strong>${escapeHtml(term.word)}</strong><span>${escapeHtml(term.meaning)}</span><small class="translation-citation">${term.reviewed ? '已核对' : '自动整理摘录 · 尚未逐条核对'} · ${escapeHtml(term.source)}</small></p>`).join('')}</section>`
+      : '<section class="translation-output empty-translation"><span class="translation-mode">中文释义反查英文</span><p>词典释义中没有找到这段文字。请尝试输入 2 个以上中文字符的词语；这是词条反查，不是整句翻译。</p></section>';
+    return dictionarySection;
+  }
   const basicSection = basicMatches.length
     ? `<section class="translation-output basic-translation"><span class="translation-mode">基础常用译法 · 内置词条</span>${basicMatches.map(entry => `<p><strong>${escapeHtml(entry.phrase)}</strong><span>${escapeHtml(entry.translation)}</span><small class="translation-citation">${escapeHtml(entry.usage)} · 暂不依赖原书核对</small></p>`).join('')}</section>`
     : '<section class="translation-output empty-translation"><span class="translation-mode">基础常用译法</span><p>目前的内置基础词条尚未收录这段内容。</p></section>';
@@ -116,16 +125,17 @@ function render() {
 }
 
 function resultFor(text, record = true, updateMain = true) {
-  const basicMatches = lookupBasicTranslations(text);
-  const matches = dictionaryRepository.lookup(text);
-  const candidates = dictionaryRepository.lookupCandidates(text);
-  const pageHits = dictionaryRepository.searchPages(text);
+  const direction = isChineseQuery(text) ? 'zh-en' : 'en-zh';
+  const basicMatches = direction === 'en-zh' ? lookupBasicTranslations(text) : [];
+  const matches = direction === 'zh-en' ? dictionaryRepository.reverseLookup(text) : dictionaryRepository.lookup(text);
+  const candidates = direction === 'zh-en' ? [] : dictionaryRepository.lookupCandidates(text);
+  const pageHits = direction === 'zh-en' ? [] : dictionaryRepository.searchPages(text);
   if (!updateMain) {
     try {
       if (record) state.history = historyRepository.add({ id: crypto.randomUUID(), createdAt: new Date().toISOString(), sourceText: text.slice(0, 240), provider: dictionaryRepository.selectedBooks().map(book => book.title).join('、') + ' · 本地测试译义', dictionaryIds: dictionaryRepository.selectedBooks().map(book => book.id), domain: '翻译查询', matchedTerms: matches.map(term => term.word) });
       if (state.view === 'history') renderHistory();
     } catch { showToast('查询完成，但本机记录未能保存'); }
-    return { basicMatches, matches, candidates, pageHits };
+    return { basicMatches, matches, candidates, pageHits, direction };
   }
   state.lastText = text;
   state.currentMatches = matches;
@@ -133,17 +143,27 @@ function resultFor(text, record = true, updateMain = true) {
   const copyableTerms = basicMatches.length ? basicMatches : [...matches, ...candidates];
   state.currentTranslation = basicMatches.length
     ? basicMatches.map(entry => entry.translation).join('\n')
+    : direction === 'zh-en'
+    ? matches.map(term => term.word).join('\n')
     : copyableTerms.map(term => copyableTerms.length > 1 ? `${term.word}：${term.meaning}` : term.meaning).join('\n');
   state.showMatches = true;
   $('#main-insight').classList.remove('hidden');
-  $('#match-count').textContent = `已核对释义 ${matches.length} 条 · 原书词条候选 ${candidates.length} 条 · ${pageHitsLabel(pageHits)} ${pageHits.length} 页`;
+  $('#match-count').textContent = direction === 'zh-en'
+    ? `中文释义匹配到 ${matches.length} 条英文词条候选${matches.some(term => term.reviewed) ? '（含已核对词条）' : '（均待核对）'}`
+    : `已核对释义 ${matches.length} 条 · 原书词条候选 ${candidates.length} 条 · ${pageHitsLabel(pageHits)} ${pageHits.length} 页`;
   $('#matched-terms').innerHTML = matches.map(term => `<button class="match-chip" type="button" data-select-term="${escapeHtml(term.id)}">${escapeHtml(term.word)}<small>${escapeHtml(term.source)} · 页码 ${escapeHtml(term.page || "待核对")}</small></button>`).join('');
-  const translationHtml = renderTranslationSections(basicMatches, matches, candidates);
+  const translationHtml = renderTranslationSections(basicMatches, matches, candidates, direction);
   const evidenceHtml = matches.length ? `<details class="translation-evidence"><summary>查看词典依据 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>` : '';
   const pageHtml = pageHits.map(({ page, snippet }) => `<article class="ocr-hit"><div><strong>${escapeHtml(page.source)} · 扫描顺序第 ${page.scanPage} 页</strong><span>${pageTextLabel(page)} · 尚未逐条校对</span><p>${escapeHtml(snippet)}</p></div><button class="secondary-button" type="button" data-reader-open="${page.scanPage}" data-reader-dictionary="${escapeHtml(page.dictionaryId)}">查看原页</button></article>`).join('');
   $('#section-title').textContent = state.view === 'pinned' ? '收藏的词条' : '词典查证与来源';
-  $('#main-provider').textContent = basicMatches.length ? '基础译法 + 词典释义' : '基础译法库 + 词典作为来源';
-  $('#main-result-note').textContent = !state.indexReady ? '基础译法已显示，词典资料载入后自动补充' : basicMatches.length ? '复制时优先复制基础常用译法' : candidates.length ? '自动整理释义与基础译法分开展示' : '基础常用译法与词典释义分开展示';
+  $('#main-input-label').textContent = direction === 'zh-en' ? '中文原文' : '英文原文';
+  $('#main-input').placeholder = direction === 'zh-en' ? '输入中文词语或释义，例如：在船尾地' : "输入要翻译的英文，例如：Aladdin's cave";
+  $('#main-output-label').textContent = direction === 'zh-en' ? '英文词条候选' : '中文译文';
+  $('#main-provider').textContent = direction === 'zh-en' ? '中文释义反查 · 词典候选' : basicMatches.length ? '基础译法 + 词典释义' : '基础译法库 + 词典作为来源';
+  $('#main-copy-label').textContent = direction === 'zh-en' ? '复制英文候选' : '复制译文';
+  $('#main-result-note').textContent = direction === 'zh-en'
+    ? '复制时仅复制英文词条；自动整理词条仍待核对，不提供整句翻译'
+    : !state.indexReady ? '基础译法已显示，词典资料载入后自动补充' : basicMatches.length ? '复制时优先复制基础常用译法' : candidates.length ? '自动整理释义与基础译法分开展示' : '基础常用译法与词典释义分开展示';
   const candidateEvidence = candidates.length ? `<details class="translation-evidence"><summary>稍后核对原书摘录 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term)).join('')}</details>` : '';
   $('#main-result').innerHTML = `${translationHtml}${evidenceHtml}${candidateEvidence}${pageHits.length ? `<details class="translation-evidence ocr-evidence"><summary>稍后查看相关原书页面 · ${pageHits.length} 页</summary>${pageHtml}</details>` : ''}`;
   $('#main-copy').disabled = !copyableTerms.length;
@@ -152,30 +172,30 @@ function resultFor(text, record = true, updateMain = true) {
     if (record) state.history = historyRepository.add({ id: crypto.randomUUID(), createdAt: new Date().toISOString(), sourceText: text.slice(0, 240), provider: dictionaryRepository.selectedBooks().map(book => book.title).join('、') + ' · 本地测试译义', dictionaryIds: dictionaryRepository.selectedBooks().map(book => book.id), domain: '翻译查询', matchedTerms: matches.map(term => term.word) });
     if (state.view === 'history') renderHistory();
   } catch { showToast('查询完成，但本机记录未能保存'); }
-  return { basicMatches, matches, candidates, pageHits };
+  return { basicMatches, matches, candidates, pageHits, direction };
 }
 
 function renderQuickResult(text, queryResult = resultFor(text, false, false)) {
-  const { basicMatches, matches, candidates, pageHits } = queryResult;
+  const { basicMatches, matches, candidates, pageHits, direction } = queryResult;
   const result = $('#translation-result');
-  result.innerHTML = `${renderTranslationSections(basicMatches, matches, candidates)}${matches.length ? `<details class="translation-evidence"><summary>稍后查看词典出处 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>` : ''}${candidates.length ? `<details class="translation-evidence"><summary>稍后核对原书摘录 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term, true)).join('')}</details>` : ''}${state.indexReady && !basicMatches.length && !matches.length && !candidates.length ? `<button class="secondary-button quick-to-main" id="quick-to-main">${pageHits.length ? '稍后查看相关词典页面' : '打开全书词典查找'}</button>` : ''}`;
+  result.innerHTML = `${renderTranslationSections(basicMatches, matches, candidates, direction)}${direction !== 'zh-en' && matches.length ? `<details class="translation-evidence"><summary>稍后查看词典出处 · ${matches.length} 条</summary>${matches.map(term => renderEntry(term)).join('')}</details>` : ''}${candidates.length ? `<details class="translation-evidence"><summary>稍后核对原书摘录 · ${candidates.length} 条</summary>${candidates.map(term => renderCandidate(term, true)).join('')}</details>` : ''}${state.indexReady && !basicMatches.length && !matches.length && !candidates.length && direction !== 'zh-en' ? `<button class="secondary-button quick-to-main" id="quick-to-main">${pageHits.length ? '稍后查看相关词典页面' : '打开全书词典查找'}</button>` : ''}`;
   $('#quick-to-main')?.addEventListener('click', () => { quickModal.close(); $('#main-input').value = text; $('#main-input').focus(); });
 }
 
 async function lookupInto(input, result, button, isMain = false) {
   if (button.disabled) return;
   const text = input.value.trim();
-  if (!text) { input.setAttribute('aria-invalid', 'true'); input.focus(); showToast('请输入要查询的英文'); return; }
+  if (!text) { input.setAttribute('aria-invalid', 'true'); input.focus(); showToast('请输入要查询的文字'); return; }
   input.removeAttribute('aria-invalid');
   setBusy(button, true, '翻译', '翻译中…');
   result.setAttribute('aria-busy', 'true');
   if (isMain) {
     $('#main-clear').disabled = true;
     $('#main-clipboard').disabled = true;
-    $('#main-provider').textContent = '正在匹配词典…';
-    $('#main-result').textContent = '正在整理词典译义…';
+    $('#main-provider').textContent = isChineseQuery(text) ? '正在反查英文词条…' : '正在匹配词典…';
+    $('#main-result').textContent = isChineseQuery(text) ? '正在查找对应英文词条…' : '正在整理词典译义…';
   } else {
-    result.textContent = '正在整理词典译义…';
+    result.textContent = isChineseQuery(text) ? '正在查找对应英文词条…' : '正在整理词典译义…';
   }
   try {
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -328,6 +348,10 @@ $('#main-clear').addEventListener('click', () => {
   if ($('#main-lookup').disabled) return;
   $('#main-input').value = '';
   $('#main-input').removeAttribute('aria-invalid');
+  $('#main-input-label').textContent = '英文原文';
+  $('#main-output-label').textContent = '中文译文';
+  $('#main-copy-label').textContent = '复制译文';
+  $('#main-input').placeholder = "输入要翻译的英文，例如：Aladdin's cave";
   $('#main-result').innerHTML = '<span class="result-placeholder">中文译文会优先显示在这里</span>';
   $('#main-provider').textContent = '等待翻译';
   $('#main-result-note').textContent = '译文优先展示，词典依据随后展开';

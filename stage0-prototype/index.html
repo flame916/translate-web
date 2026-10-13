@@ -47,7 +47,7 @@
           <div class="dictionary-controls"><label for="dictionary-select">使用词典</label><select id="dictionary-select" disabled><option>词典载入中…</option></select><span id="dictionary-load-status" role="status" aria-live="polite">基础常用译法已可用，词典正在后台载入。</span><button class="quiet-button" id="dictionary-retry" type="button" hidden>重试载入词典</button></div>
           <div class="translation-grid">
             <div class="editor-pane">
-              <div class="pane-head"><label for="main-input">英文原文</label><span class="pane-hint">词语 · 短语 · 句子</span></div>
+              <div class="pane-head"><label id="main-input-label" for="main-input">英文原文</label><span class="pane-hint">词语 · 短语 · 句子</span></div>
               <textarea id="main-input" rows="5" placeholder="输入要翻译的英文，例如：Aladdin's cave" aria-describedby="lookup-note"></textarea>
               <div class="pane-actions">
                 <button class="secondary-button" id="main-clipboard">读取剪贴板</button>
@@ -56,15 +56,15 @@
               </div>
             </div>
             <div class="editor-pane result-pane">
-              <div class="pane-head"><span>中文译文</span><span class="pane-hint" id="main-provider">等待翻译</span></div>
+              <div class="pane-head"><span id="main-output-label">中文译文</span><span class="pane-hint" id="main-provider">等待翻译</span></div>
               <div class="main-result" id="main-result" role="status" aria-live="polite"><span class="result-placeholder">中文译文会优先显示在这里</span></div>
               <div class="pane-actions result-actions">
                 <span class="result-footnote" id="main-result-note">译文优先展示，词典依据随后展开</span>
-                <button class="secondary-button" id="main-copy" disabled><span data-icon="copy"></span>复制译文</button>
+                <button class="secondary-button" id="main-copy" disabled><span data-icon="copy"></span><span id="main-copy-label">复制译文</span></button>
               </div>
             </div>
           </div>
-          <p class="lookup-note" id="lookup-note">基础译法库目前收录常见问候语；其他内容会分开展示词典释义。暂未接入整句翻译引擎。</p>
+          <p class="lookup-note" id="lookup-note">基础译法库目前收录常见问候语；也可输入中文按词典释义反查英文词条。中文反查是词条候选，不是整句翻译。</p>
           <div class="insight-strip hidden" id="main-insight">
             <div><span class="eyebrow">词典匹配</span><strong id="match-count">等待查询</strong></div>
             <div class="matched-terms" id="matched-terms"></div>
@@ -101,7 +101,7 @@
     <div class="quick-overlay hidden" id="quick-overlay" role="dialog" aria-modal="true" aria-labelledby="quick-title">
       <div class="quick-panel">
         <div class="quick-header"><div><span class="eyebrow">QUICK TRANSLATE</span><h2 id="quick-title">快捷翻译</h2></div><button class="close-button" id="quick-close" aria-label="关闭快捷翻译"><span data-icon="close"></span></button></div>
-        <div class="quick-input-wrap"><label for="quick-input" class="sr-only">输入要翻译的英文</label><textarea id="quick-input" rows="3" placeholder="输入词语、短语或句子"></textarea><button class="clipboard-button" id="clipboard-read">读取剪贴板</button></div>
+        <div class="quick-input-wrap"><label for="quick-input" class="sr-only">输入要查询的英文或中文</label><textarea id="quick-input" rows="3" placeholder="输入英文查中文，或输入中文反查英文词条"></textarea><button class="clipboard-button" id="clipboard-read">读取剪贴板</button></div>
         <div class="quick-controls"><span class="source-caption" id="quick-source-caption">来源：当前选择的词典</span><button class="primary-button" id="translate-button">翻译</button></div>
         <div class="translation-result" id="translation-result" role="status" aria-live="polite"><span class="result-placeholder">词典释义与出处会显示在这里</span></div>
           <div class="adapter-hint"><span class="status-dot"></span>先显示可用词典释义；原书核对可稍后进行</div>
@@ -118,6 +118,6 @@
     </div>
 
     <div class="lx-toast" id="toast" role="status" hidden></div>
-    <script type="module" src="./src/app.js?v=dictionary-mvp-6"></script>
+    <script type="module" src="./src/app.js?v=dictionary-mvp-7"></script>
   </body>
 </html>

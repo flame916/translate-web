@@ -11,7 +11,7 @@ function fixture() {
   ] };
   const data = {
     './assets/dictionary-library.json': catalog,
-    'entries-a': [{ id: 'bank', word: 'bank', meaning: '岸', reviewed: true }, { id: 'pending', word: 'unreviewed', meaning: '待校对', reviewed: false }],
+    'entries-a': [{ id: 'bank', word: 'bank', meaning: '岸', reviewed: true }, { id: 'pending', word: 'unreviewed', meaning: '待校对', reviewed: false }, { id: 'sternward', word: 'sternward', meaning: '在船尾地；向船尾地', reviewed: false }, { id: 'greet-example', word: 'greet', meaning: 'v. 问候〔你好，朋友。〕', reviewed: false }],
     'entries-b': [{ id: 'bank', word: 'bank', meaning: '银行', reviewed: true }, { id: 'phrase', word: 'red tape', meaning: '繁文缛节', reviewed: true }],
     'pages-a': { pages: [{ scanPage: 1, file: 'one.jpeg', text: 'bank 词典甲原文' }] },
     'pages-b': { pages: [{ scanPage: 1, file: 'one.jpeg', text: 'bank 词典乙原文' }] }
@@ -31,6 +31,28 @@ test('simultaneous lookup preserves conflicting meanings, priority and source-sp
   assert.equal(library.lookup('It is red tape.')[0].word, 'red tape');
 });
 
+test('Chinese reverse lookup finds English headwords from dictionary definitions', async () => {
+  const library = new DictionaryLibrary();
+  const data = fixture();
+  await library.load(async path => data[path]);
+  assert.deepEqual(library.reverseLookup('在船尾地').map(entry => entry.word), ['sternward']);
+  assert.deepEqual(library.reverseLookup(' 在船尾地， ').map(entry => entry.word), ['sternward']);
+  assert.deepEqual(library.reverseLookup('银行').map(entry => entry.word), ['bank']);
+  assert.deepEqual(library.reverseLookup('你好').map(entry => entry.word), [], 'example sentences are excluded to avoid misleading reverse matches');
+  assert.equal(library.reverseLookup('岸').length, 0, 'single-character searches are too noisy');
+});
+
+test('Chinese reverse lookup respects selected dictionaries, result limits and safety ordering', async () => {
+  const library = new DictionaryLibrary();
+  const data = fixture();
+  data['entries-a'].push({ id: 'institution', word: 'institution', meaning: '银行；金融机构', reviewed: true });
+  await library.load(async path => data[path]);
+  assert.deepEqual(library.reverseLookup('银行').map(entry => entry.word), ['bank', 'institution']);
+  assert.equal(library.reverseLookup('银行', 1).length, 1);
+  library.select('book-b');
+  assert.deepEqual(library.reverseLookup('银行').map(entry => entry.word), ['bank']);
+});
+
 test('single-book filtering and page routing cannot cross dictionary boundaries', async () => {
   const library = new DictionaryLibrary();
   const data = fixture();
@@ -42,7 +64,7 @@ test('single-book filtering and page routing cannot cross dictionary boundaries'
   library.select('book-a');
   assert.deepEqual(library.lookup('bank').map(entry => entry.source), ['测试词典甲']);
   assert.deepEqual(library.searchPages('bank').map(hit => hit.page.dictionaryId), ['book-a']);
-  assert.equal(library.allEntries().length, 4);
+  assert.equal(library.allEntries().length, 6);
   assert.throws(() => library.select('absent'));
 });
 
