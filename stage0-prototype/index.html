@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f6f2" />
     <title>Lexicon · 词典翻译台</title>
-    <link rel="stylesheet" href="./styles.css?v=dictionary-mvp-1" />
+    <link rel="stylesheet" href="./styles.css?v=dictionary-mvp-2" />
   </head>
   <body>
     <div class="app-shell">
@@ -39,8 +39,8 @@
           <div class="workbench-head">
             <div>
               <span class="lx-badge" id="dictionary-source-label">词典库载入中…</span>
-              <h2 id="lookup-heading">先看译义，再核对词典依据。</h2>
-              <p>先显示词典译义；自动整理的内容会标明待核对，原书出处可稍后展开查看。</p>
+              <h2 id="lookup-heading">基础译法与词典释义，分开展示。</h2>
+              <p>先看基础常用译法，再参考导入词典的义项；原书出处可稍后展开。</p>
             </div>
             <span class="privacy-badge"><span class="status-dot"></span>本地查询</span>
           </div>
@@ -64,7 +64,7 @@
               </div>
             </div>
           </div>
-          <p class="lookup-note" id="lookup-note">优先显示查到的词典释义；自动整理内容会标明待核对，原书页面作为后续参考。尚未接入整句翻译引擎。</p>
+          <p class="lookup-note" id="lookup-note">基础译法库目前收录常见问候语；其他内容会分开展示词典释义。暂未接入整句翻译引擎。</p>
           <div class="insight-strip hidden" id="main-insight">
             <div><span class="eyebrow">词典匹配</span><strong id="match-count">等待查询</strong></div>
             <div class="matched-terms" id="matched-terms"></div>
@@ -118,7 +118,7 @@
     </div>
 
     <div class="lx-toast" id="toast" role="status" hidden></div>
-    <script type="module" src="./src/app.js?v=dictionary-mvp-3"></script>
+    <script type="module" src="./src/app.js?v=dictionary-mvp-4"></script>
   </body>
 </html>
 
