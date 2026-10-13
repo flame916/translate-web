@@ -44,7 +44,7 @@
             </div>
             <span class="privacy-badge"><span class="status-dot"></span>本地查询</span>
           </div>
-          <div class="dictionary-controls"><label for="dictionary-select">使用词典</label><select id="dictionary-select" disabled><option>载入中…</option></select><span>选择一本或全部词典，结果保留各自出处</span></div>
+          <div class="dictionary-controls"><label for="dictionary-select">使用词典</label><select id="dictionary-select" disabled><option>词典载入中…</option></select><span id="dictionary-load-status" role="status" aria-live="polite">基础常用译法已可用，词典正在后台载入。</span><button class="quiet-button" id="dictionary-retry" type="button" hidden>重试载入词典</button></div>
           <div class="translation-grid">
             <div class="editor-pane">
               <div class="pane-head"><label for="main-input">英文原文</label><span class="pane-hint">词语 · 短语 · 句子</span></div>
@@ -82,16 +82,16 @@
           <div class="reader-heading">
             <div><span class="eyebrow">COMPLETE SOURCE</span><h2 id="book-reader-title">全书扫描页</h2><label for="reader-dictionary">阅读词典</label><select id="reader-dictionary" disabled><option>载入中…</option></select><p id="reader-status">正在载入原书页面与识别文本…</p></div>
             <div class="reader-pagination" aria-label="原书页面浏览">
-              <button class="secondary-button" id="reader-prev" aria-label="上一张扫描页">上一页</button>
-              <label for="reader-page" class="sr-only">扫描顺序页</label><input id="reader-page" type="number" min="1" value="1" />
+              <button class="secondary-button" id="reader-prev" aria-label="上一张扫描页" disabled>上一页</button>
+              <label for="reader-page" class="sr-only">扫描顺序页</label><input id="reader-page" type="number" min="1" value="1" disabled />
               <span id="reader-total">/ —</span>
-              <button class="secondary-button" id="reader-go">打开</button>
-              <button class="secondary-button" id="reader-next" aria-label="下一张扫描页">下一页</button>
+              <button class="secondary-button" id="reader-go" disabled>打开</button>
+              <button class="secondary-button" id="reader-next" aria-label="下一张扫描页" disabled>下一页</button>
             </div>
           </div>
           <div class="reader-grid">
             <div class="reader-text-wrap"><div class="reader-page-label" id="reader-page-label">原书内容</div><pre class="reader-text" id="reader-text">识别内容尚未载入。</pre></div>
-            <button class="reader-image-button" id="reader-view-source" type="button"><img id="reader-image" alt="当前词典原书扫描页" /><span>放大查看原书页</span></button>
+            <button class="reader-image-button" id="reader-view-source" type="button" disabled><img id="reader-image" alt="当前词典原书扫描页" /><span>放大查看原书页</span></button>
           </div>
           <p class="reader-footnote">每本词典保留自己的页面顺序和出处。提取文本尚未逐条校对；有原图的页面可放大核对。</p>
         </section>
@@ -118,7 +118,6 @@
     </div>
 
     <div class="lx-toast" id="toast" role="status" hidden></div>
-    <script type="module" src="./src/app.js?v=dictionary-mvp-4"></script>
+    <script type="module" src="./src/app.js?v=dictionary-mvp-5"></script>
   </body>
 </html>
-
